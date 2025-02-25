@@ -37,7 +37,13 @@ def add_to_cart(request, product_id):
     cart_item.save()
     return redirect('cart')
 
+ #This view allows the user to remove a product from her shopping cart.
+# این ویو به کاربر اجازه می‌دهد که محصولی را از سبد خرید خود حذف کند.
 
+def remove_from_cart(request, cart_item_id):
+    cart_item = get_object_or_404(CartItem, id=cart_item_id)
+    cart_item.delete()  # حذف محصول از سبد خرید
+    return redirect('cart')
 
 
 
