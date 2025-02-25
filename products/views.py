@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404,redirect
 from rest_framework import serializers
-from .models import Product
+from .models import Product,Review
 from .models import Category
 from .models import Cart,CartItem
 from .models import Order, Payment
@@ -64,6 +64,17 @@ def payment_view(request, order_id):
         order.save()
         return redirect('order', order_id=order.id)
     return render(request, 'shop/payment.html', {'order': order})
+
+# This view allows users to post their opinion and rating for a product.
+# این ویو به کاربران اجازه می‌دهد که نظر و امتیاز خود را برای یک محصول ارسال کنند.
+def review_view(request, product_id):
+    product = get_object_or_404(Product, id=product_id)
+    if request.method == 'POST':
+        rating = request.POST.get('rating')
+        comment = request.POST.get('comment')
+        Review.objects.create(product=product, user=request.user, rating=rating, comment=comment)
+        return redirect('product_detail', product_id=product.id)
+    return render(request, 'shop/review.html', {'product': product})
 
 
 
