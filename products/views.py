@@ -76,6 +76,15 @@ def review_view(request, product_id):
         return redirect('product_detail', product_id=product.id)
     return render(request, 'shop/review.html', {'product': product})
 
+# This view is for searching products based on name or other attributes.
+# این ویو برای جستجوی محصولات بر اساس نام یا ویژگی‌های دیگر است.
+def search_view(request):
+    query = request.GET.get('q')
+    if query:
+        products = Product.objects.filter(name__icontains=query)  # جستجو بر اساس نام محصول
+    else:
+        products = Product.objects.all()
+    return render(request, 'shop/search.html', {'products': products})
 
 
 
