@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404,redirect
 from rest_framework import serializers
-from .models import Product
+from .models import Product,order
 from .models import Category
 from .models import Cart,CartItem
 
@@ -44,6 +44,12 @@ def remove_from_cart(request, cart_item_id):
     cart_item = get_object_or_404(CartItem, id=cart_item_id)
     cart_item.delete()  # حذف محصول از سبد خرید
     return redirect('cart')
+
+# This view is for displaying order details and purchase information.
+# این ویو برای نمایش جزئیات سفارش و اطلاعات مربوط به خرید است.
+def order_view(request, order_id):
+    order = get_object_or_404(Order, id=order_id)
+    return render(request, 'shop/order.html', {'order': order})
 
 
 
