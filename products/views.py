@@ -1,8 +1,9 @@
 from django.shortcuts import render, get_object_or_404,redirect
 from rest_framework import serializers
-from .models import Product,order
+from .models import Product
 from .models import Category
 from .models import Cart,CartItem
+from .models import Order, Payment
 
 #The home page view usually displays all the main products or categories.
 def home(request):
@@ -50,6 +51,21 @@ def remove_from_cart(request, cart_item_id):
 def order_view(request, order_id):
     order = get_object_or_404(Order, id=order_id)
     return render(request, 'shop/order.html', {'order': order})
+
+# The payment view shows the payment process and completion of the purchase.
+# ویو پرداخت نمایش فرآیند پرداخت و تکمیل خرید است.
+
+def payment_view(request, order_id):
+    order = get_object_or_404(Order, id=order_id)
+    if request.method == 'POST':
+        # انجام عملیات پرداخت (در واقع اینجا فقط نمایش داده می‌شود)
+        payment = Payment.objects.create(order=order, amount=order.total_price, payment_method='credit_card', status='completed')
+        order.status = 'paid'
+        order.save()
+        return redirect('order', order_id=order.id)
+    return render(request, 'shop/payment.html', {'order': order})
+
+
 
 
 
