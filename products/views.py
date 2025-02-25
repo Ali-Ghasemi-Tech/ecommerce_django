@@ -1,6 +1,7 @@
 from django.shortcuts import render, get_object_or_404
 from rest_framework import serializers
 from .models import Product
+from .models import Category
 
 #The home page view usually displays all the main products or categories.
 def home(request):
@@ -12,6 +13,13 @@ def home(request):
 def product_detail(request, product_id):
     product = get_object_or_404(Product, id=product_id)
     return render(request, 'shop/product_detail.html', {'product': product})
+
+# This view displays the products based on the specific category selected by the user
+ef category_view(request, category_id):
+    category = get_object_or_404(Category, id=category_id)
+    products = category.product_set.all()  # محصولات این دسته‌بندی را دریافت می‌کنیم
+    return render(request, 'shop/category.html', {'category': category, 'products': products})
+
 
 
 
