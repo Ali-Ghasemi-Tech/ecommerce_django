@@ -10,8 +10,6 @@ class Order(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     customer = models.ForeignKey(MemberModel, on_delete=models.CASCADE,default=1)
     quantity = models.IntegerField(default=1)
-    address = models.TextField(max_length=500,default="",blank=True,null=True)
-    phone_number = models.CharField(max_length=11,default="",blank=True,null=True)
     date = models.DateTimeField(auto_now_add=True)
     status = models.BooleanField(default=False)
     zipcode = models.CharField(max_length=11,default="",blank=True,null=True)
