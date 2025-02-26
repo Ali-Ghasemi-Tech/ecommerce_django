@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import MemberModel
 from .backends import MemberAuthBackend
+from .permissions import IsSuperUserOrSelf
 
 class SignupApiView(ListCreateAPIView):
     queryset = MemberModel.objects.all()
@@ -32,12 +33,14 @@ class LoginApiView(APIView):
 class DeleteApiView(RetrieveDestroyAPIView):
     queryset = MemberModel.objects.all()
     serializer_class = MemberSerializer
-    # permission_classes = {'post' : [permissions.IsAuthenticated] , 'post': [ permissions.IsAdminUser] }
+    permission_classes = [IsSuperUserOrSelf]
 
 class DetailApiView(RetrieveAPIView):
     queryset = MemberModel.objects.all()
     serializer_class = MemberSerializer
+    permission_classes = [IsSuperUserOrSelf]
 
 class MemberListApiView(ListAPIView):
     queryset = MemberModel.objects.all()
     serializer_class = MemberSerializer
+    permission_classes = [permissions.IsAdminUser]

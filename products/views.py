@@ -17,7 +17,7 @@ def product_detail(request, product_id):
     return render(request, 'shop/product_detail.html', {'product': product})
 
 # This view displays the products based on the specific category selected by the user
-ef category_view(request, category_id):
+def category_view(request, category_id):
     category = get_object_or_404(Category, id=category_id)
     products = category.product_set.all()  # محصولات این دسته‌بندی را دریافت می‌کنیم
     return render(request, 'shop/category.html', {'category': category, 'products': products})

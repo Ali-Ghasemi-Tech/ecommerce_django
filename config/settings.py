@@ -41,6 +41,7 @@ INSTALLED_APPS = [
 
     #loacal
     'users',
+    'products',
 
     #3rd party
     'rest_framework',
@@ -149,4 +150,3 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
