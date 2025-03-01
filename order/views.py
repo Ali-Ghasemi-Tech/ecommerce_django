@@ -1,5 +1,8 @@
 from django.shortcuts import render , redirect , get_object_or_404
 from .models import Cart , Product , CartItem ,Order
+from .models import Order, OrderItem
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect
 
 
 # Create your views here.
@@ -33,3 +36,31 @@ def remove_from_cart(request, cart_item_id):
 def order_view(request, order_id):
     order = get_object_or_404(Order, id=order_id)
     return render(request, 'shop/order.html', {'order': order})
+
+# create today satarday
+
+@login_required
+def create_order(request):
+    if request.method == "POST":
+        cart = request.session.get('cart', {})  # گرفتن سبد خرید از سشن
+        total_price = sum(item['price'] * item['quantity'] for item in cart.values())
+
+        # ایجاد سفارش جدید
+        order = Order.objects.create(user=request.user, total_price=total_price)
+
+        # اضافه کردن محصولات به سفارش
+        for product_id, item in cart.items():
+            OrderItem.objects.create(
+                order=order,
+                product=item['name'],
+                price=item['price'],
+                quantity=item['quantity']
+            )
+
+        # پاک کردن سبد خرید
+        del request.session['cart']
+
+        return redirect('order_success', order_id=order.id)
+
+    return render(request, 'create_order.html')
+
