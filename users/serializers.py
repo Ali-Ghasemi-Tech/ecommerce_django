@@ -69,7 +69,8 @@ class SignupSerializer(serializers.ModelSerializer):
             username=validated_data['username'],
             firstname = validated_data['firstname'],
             lastname = validated_data['lastname'],
-            password=validated_data['password']
+            password=validated_data['password'] ,
+            email = validated_data['email'],
         )
         member.save()
         return member
