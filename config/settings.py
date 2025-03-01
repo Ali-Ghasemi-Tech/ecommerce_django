@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'users',
     'products',
 
+
     #3rd party
     'rest_framework',
     'rest_framework.authtoken',
