@@ -64,3 +64,16 @@ def create_order(request):
 
     return render(request, 'create_order.html')
 
+# The payment view shows the payment process and completion of the purchase.
+# ویو پرداخت نمایش فرآیند پرداخت و تکمیل خرید است.
+
+def payment_view(request, order_id):
+    order = get_object_or_404(Order, id=order_id)
+    if request.method == 'POST':
+        # انجام عملیات پرداخت (در واقع اینجا فقط نمایش داده می‌شود)
+        payment = Payment.objects.create(order=order, amount=order.total_price, payment_method='credit_card',
+                                         status='completed')
+        order.status = 'paid'
+        order.save()
+        return redirect('order', order_id=order.id)
+    return render(request, 'shop/payment.html', {'order': order})

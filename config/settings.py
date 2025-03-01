@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     #loacal
     'users',
     'products',
+    'order',
 
 
     #3rd party
