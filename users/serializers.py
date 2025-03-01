@@ -8,8 +8,8 @@ class SignupSerializer(serializers.ModelSerializer):
     class Meta:
         model = MemberModel
         exclude = ['is_active' , 'last_login']
-        widgets ={
-            'password': {'write_only': True},
+        extra_kwargs = {
+            'password': {'write_only': True},  # Ensure password is write-only
         }
 
     def validate_username(self , validated_data):

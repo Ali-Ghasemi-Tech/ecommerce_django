@@ -38,7 +38,7 @@ class SignupApiView(ListCreateAPIView):
         
 
 class VerifyEmailView(APIView):
-    def get(self, request, token):
+    def get(self, token):
         profile = get_object_or_404(Profile, email_verification_token=token)
         user = profile.user
         user.is_active = True
