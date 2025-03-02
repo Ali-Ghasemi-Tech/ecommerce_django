@@ -1,6 +1,8 @@
 from rest_framework import serializers
 from .models import MemberModel
 from django.contrib.auth.password_validation import validate_password
+import re
+
 
 
 
@@ -45,6 +47,18 @@ class SignupSerializer(serializers.ModelSerializer):
         except serializers.ValidationError as e:
             self.add_error('password' , e.messages)
         return password 
+    
+    def validate_phone_number(self , validated_data):
+        phone_number = validated_data
+        regex = r"^(09)(14|13|12|19|18|17|15|16|11|10|90|91|92|93|94|95|96|32|30|33|35|36|37|38|39|00|01|02|03|04|05|41|20|21|22|23|31|34)\d{7}$"
+
+        if not phone_number.isdigit():
+            raise serializers.ValidationError('phone number should only contain digits')
+        if len(phone_number) != 11:
+            raise serializers.ValidationError('phone number should be 11 digits long')
+        if not re.match(regex, phone_number):
+            raise serializers.ValidationError('Invalid phone number')
+        return phone_number
 
     def validate(self, attrs):
         password = attrs.get('password')

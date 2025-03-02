@@ -1,9 +1,9 @@
 from django.urls import path , include
-from .views import  SignupApiView , UpdateApiView , LoginApiView , DeleteApiView , DetailApiView , MemberListApiView , VerifyEmailView
+from .views import  SignupApiView , UpdateApiView , LoginApiView , DeleteApiView , DetailApiView , MemberListApiView , VerifyEmailView , VerifyPhoneView
 urlpatterns =[
     path('api/signup/' , SignupApiView.as_view() , name='signup_api'),
     path('api/verify-email/<str:token>/', VerifyEmailView.as_view(), name='verify_email'),
-
+    path('api/verify-phone/', VerifyPhoneView.as_view(), name='verify_phone'),
     path('api/login/' , LoginApiView.as_view() , name='login_api'),
     path('api/memberslist/' , MemberListApiView.as_view() , name = 'member_list'),
     path('api/<int:pk>/update/' , UpdateApiView.as_view() , name= 'update_api'),

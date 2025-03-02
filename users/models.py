@@ -13,6 +13,7 @@ class MemberModel(models.Model):
     email = models.EmailField(blank=True ,null=True , unique=True )
     password= models.CharField(max_length=128)
     last_login = models.DateTimeField(null=True , blank= True)
+    phone_number = models.CharField(max_length=11)
     
     
 
@@ -25,10 +26,16 @@ class MemberModel(models.Model):
 class Profile(models.Model):
     user = models.OneToOneField(MemberModel , on_delete=models.CASCADE)
     email_verification_token = models.CharField(max_length=255 , blank=True , null= True)
+    phone_verification_token = models.CharField(max_length=255 , blank=True , null= True)
     
     def generate_verification_token(self):
         self.email_verification_token = str(uuid.uuid4())
         self.save()
         return self.email_verification_token
 
+    def generate_phone_verification_token(self):
+        verification_token = str(uuid.uuid4())
+        self.phone_verification_token = verification_token[0:4]
+        self.save()
+        return self.phone_verification_token
 
