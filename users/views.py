@@ -1,7 +1,7 @@
 from .serializers import SignupSerializer , UpdateSerializer , LoginSerializer, MemberSerializer
 from rest_framework.generics import ListCreateAPIView , RetrieveUpdateAPIView , RetrieveDestroyAPIView , RetrieveAPIView , ListAPIView
 from rest_framework import status , permissions
-from rest_framework.response import Response
+from rest_framework.response import Response 
 from rest_framework.views import APIView
 from .models import MemberModel , Profile
 from django.conf import settings
@@ -9,6 +9,9 @@ from django.core.mail import send_mail
 from .backends import MemberAuthBackend
 from .permissions import IsSuperUserOrSelf
 from django.shortcuts import get_object_or_404
+
+
+# add phone verification
 
 class SignupApiView(ListCreateAPIView):
     queryset = MemberModel.objects.all()

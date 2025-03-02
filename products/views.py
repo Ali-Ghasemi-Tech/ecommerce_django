@@ -28,17 +28,17 @@ class ProductDetailApi(generics.RetrieveAPIView):
 
 
 class ProductSearchByTagAPIView(generics.ListAPIView):
-
+    pass
 
 # This view allows users to post their opinion and rating for a product.
 # این ویو به کاربران اجازه می‌دهد که نظر و امتیاز خود را برای یک محصول ارسال کنند.
-def review_view(request, product_id):
-    product = get_object_or_404(Product, id=product_id)
-    if request.method == 'POST':
-        rating = request.POST.get('rating')
-        comment = request.POST.get('comment')
-        Review.objects.create(product=product, user=request.user, rating=rating, comment=comment)
-        return redirect('product_detail', product_id=product.id)
-    return render(request, 'shop/review.html', {'product': product})
+    # def review_view(request, product_id):
+    #     product = get_object_or_404(Product, id=product_id)
+    #     if request.method == 'POST':
+    #         rating = request.POST.get('rating')
+    #         comment = request.POST.get('comment')
+    #         Review.objects.create(product=product, user=request.user, rating=rating, comment=comment)
+    #         return redirect('product_detail', product_id=product.id)
+    #     return render(request, 'shop/review.html', {'product': product})
 
 
