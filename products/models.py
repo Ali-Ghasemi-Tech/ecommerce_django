@@ -2,7 +2,7 @@ from django.db import models
 from users.models import MemberModel
 from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator, MaxValueValidator
-
+from taggit.managers import TaggableManager
 
 # Create your models here.
 
@@ -15,9 +15,9 @@ class Product(models.Model):
     unit_price = models.IntegerField()
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    category = models.ForeignKey('Category', on_delete=models.CASCADE)
     stock = models.PositiveIntegerField()
     active = models.BooleanField(default=True)
+    tags = TaggableManager()  
 
     def __str__(self):
         return self.name
@@ -31,18 +31,12 @@ class ProductImage(models.Model):
         return f"Image for {self.product.name}"
 
 
-#The category model is used to group products.
-class Category(models.Model):
-    name = models.CharField(max_length=255)
-    description = models.TextField()
 
-    def __str__(self):
-        return self.name
 
 
 # The comments and ratings model is for storing user feedback about different products
 
-class Review(models.Model):
+class Comment(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     user = models.ForeignKey(MemberModel, on_delete=models.CASCADE)
     rating = models.PositiveIntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
