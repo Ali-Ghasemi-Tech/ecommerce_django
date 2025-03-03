@@ -20,9 +20,18 @@ class ProductListApi(generics.ListAPIView):
 
 # This view displays the details of a specific product. The user can view information about the product.
 class ProductDetailApi(generics.RetrieveAPIView):
-    queryset = Product.objects.all()
     serializer_class = ProductDeatilSerializer
     lookup_field = 'id'
+
+    def get_queryset(self):
+        # Use prefetch_related to optimize queries for images, videos, and audios
+        return Product.objects.prefetch_related('images', 'videos', 'audios').all()
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        if hasattr(self, 'request'):
+            context['request'] = self.request
+        return context
 
 # This view displays the products based on the specific category selected by the user
 
