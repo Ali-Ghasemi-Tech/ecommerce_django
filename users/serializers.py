@@ -79,12 +79,18 @@ class SignupSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         print(type(validated_data))
+        email = None
+        if validated_data['email'] == '':
+            email = None
+        else:
+            email = validated_data['email']
         member = MemberModel.objects.create(
             username=validated_data['username'],
             firstname = validated_data['firstname'],
             lastname = validated_data['lastname'],
             password=validated_data['password'] ,
-            email = validated_data['email'],
+            email = email,
+            phone_number = validated_data['phone_number'],
         )
         member.save()
         return member
@@ -134,3 +140,13 @@ class MemberSerializer(serializers.ModelSerializer):
         model = MemberModel
         fields = '__all__' 
        
+
+class VerifyPhoneSerializer(serializers.Serializer):
+    token = serializers.CharField(
+        required=True,
+        max_length=100,
+        error_messages={
+            'required': 'Token is required',
+            'max_length': 'Token is too long (max 100 characters)'
+        }
+    )

@@ -57,3 +57,14 @@ class SignupForm(forms.ModelForm):
         if len(password) < 8 :
             raise forms.ValidationError('password should be atleast 8 characters long')
         return cleaned_data    
+    
+
+class VerifyPhoneForm(forms.Form):
+    token = forms.CharField(
+        required=True,
+        max_length=100,
+        error_messages={
+            'required': 'Token is required',
+            'max_length': 'Token is too long (max 100 characters)'
+        }
+    )
