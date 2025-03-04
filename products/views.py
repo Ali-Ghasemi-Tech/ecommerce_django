@@ -1,14 +1,19 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from rest_framework import generics
-from .models import Product
-from .serializers import ProductListSerializer, ProductDeatilSerializer
+from .models import Product, Comment
+from .serializers import ProductListSerializer, ProductDetailSerializer, CommentSerializer
 from rest_framework.pagination import PageNumberPagination
 from django.db.models import Q
+from rest_framework import serializers
+from .permissions import IsProductUser
+from rest_framework.permissions import AllowAny
+
 
 #The home page view usually displays all the main products or categories.
 class ProductListApi(generics.ListAPIView):
     serializer_class = ProductListSerializer
     pagination_class = PageNumberPagination
+
     def get_queryset(self):
         tag = self.request.query_params.get('tag', None)
         if tag:
@@ -18,10 +23,11 @@ class ProductListApi(generics.ListAPIView):
 
         return queryset
 
+
 # This view displays the details of a specific product. The user can view information about the product.
 class ProductDetailApi(generics.RetrieveAPIView):
-    serializer_class = ProductDeatilSerializer
-    lookup_field = 'id'
+    serializer_class = ProductDetailSerializer
+    lookup_field = 'product_id'
 
     def get_queryset(self):
         # Use prefetch_related to optimize queries for images, videos, and audios
@@ -33,21 +39,28 @@ class ProductDetailApi(generics.RetrieveAPIView):
             context['request'] = self.request
         return context
 
-# This view displays the products based on the specific category selected by the user
 
+class CommentListCreateView(generics.ListCreateAPIView):
+    serializer_class = CommentSerializer
 
-class ProductSearchByTagAPIView(generics.ListAPIView):
-    pass
+    def get_queryset(self):
+        product_id = self.kwargs.get('product_id')
+        return Comment.objects.filter(product_id=product_id)
 
-# This view allows users to post their opinion and rating for a product.
-# این ویو به کاربران اجازه می‌دهد که نظر و امتیاز خود را برای یک محصول ارسال کنند.
-    # def review_view(request, product_id):
-    #     product = get_object_or_404(Product, id=product_id)
-    #     if request.method == 'POST':
-    #         rating = request.POST.get('rating')
-    #         comment = request.POST.get('comment')
-    #         Review.objects.create(product=product, user=request.user, rating=rating, comment=comment)
-    #         return redirect('product_detail', product_id=product.id)
-    #     return render(request, 'shop/review.html', {'product': product})
+    def perform_create(self, serializer):
+
+        product_id = self.kwargs.get('product_id')
+        try:
+            product = Product.objects.get(id=product_id)
+        except Product.DoesNotExist:
+            raise serializers.ValidationError("Product does not exist.")
+
+        serializer.save(user=self.request.user, product=product)
+
+    def get_permissions(self):
+        if self.request.method in ['POST']:
+            return [IsProductUser()]
+        return [AllowAny()]
+
 
 

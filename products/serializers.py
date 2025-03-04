@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from products.models import Product , Comment
+from products.models import Product, Comment
+from django.db.models import Avg
 
 
 class ProductListSerializer(serializers.ModelSerializer):
@@ -7,7 +8,7 @@ class ProductListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        fields = ('name', 'description','unit_price', 'tags', 'units_sold', 'image')
+        fields = ('name', 'description', 'unit_price', 'tags', 'units_sold', 'image')
 
     def get_image(self, obj):
         first_image = obj.images.first()
@@ -23,7 +24,8 @@ class ProductDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        exclude = ('active' , 'users')
+        fields = ['name', 'description', 'price', 'images', 'videos', 'audios', 'comment_count', 'average_rating']
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.user = self.context.get('request').user if self.context.get('request') else None
@@ -50,34 +52,24 @@ class ProductDetailSerializer(serializers.ModelSerializer):
             audios = obj.audios.all()
             return [audio.audio.url for audio in audios]
         return []
-    
 
-# class CommentSerializer(serializers.ModelSerializer):
-#     # Add additional fields for related data (optional)
-#     user_username = serializers.CharField(source='user.username', read_only=True)
-#     product_name = serializers.CharField(source='product.name', read_only=True)
+    def get_comment_count(self, obj):
+        return obj.comments.count()
 
-#     # class Meta:
-#     #     model = Comment
-#     #     fields = [ 'product', 'product_name', 'user', 'user_username', 
-#     #         'rating', 'comment', 'created_at'
-#     #     ]
-#     #     read_only_fields = ['id', 'created_at', 'user_username', 'product_name'] 
+    def get_average_rating(self, obj):
+        return obj.comments.aggregate(Avg('rating'))['rating__avg']
 
-#     # def validate_rating(self, value):
-#     #     """
-#     #     Ensure the rating is between 1 and 5.
-#     #     """
-#     #     if value < 1 or value > 5:
-#     #         raise serializers.ValidationError("Rating must be between 1 and 5.")
-#     #     return value
 
-#     # def create(self, validated_data):
-#     #     """
-#     #     Create a new comment instance.
-#     #     """
-#     #     # Ensure the user is set to the requesting user
-#     #     user = self.context['request'].user
-#     #     validated_data['user'] = user
-#     #     return Comment.objects.create(**validated_data)
+class CommentSerializer(serializers.ModelSerializer):
+    user_username = serializers.CharField(source='user.username', read_only=True)
+    product_name = serializers.CharField(source='product.name', read_only=True)
 
+    class Meta:
+        model = Comment
+        fields = ['product_name', 'user_username', 'rating', 'comment', 'created_at']
+        read_only_fields = ['created_at', 'user_username', 'product_name']
+
+    def validate_rating(self, value):
+        if value < 1 or value > 5:
+            raise serializers.ValidationError("Rating must be between 1 and 5.")
+        return value
