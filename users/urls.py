@@ -1,6 +1,7 @@
 from django.urls import path , include
 from .views import  SignupApiView , UpdateApiView , LoginApiView , DeleteApiView , DetailApiView , MemberListApiView , VerifyEmailView
 urlpatterns =[
+    path('' , include('rest_framework.urls')),
     path('api/signup/' , SignupApiView.as_view() , name='signup_api'),
     path('api/verify-email/<str:token>/', VerifyEmailView.as_view(), name='verify_email'),
 
