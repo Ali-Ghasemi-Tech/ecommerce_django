@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from rest_framework import generics
 from .models import Product
-from .serializers import ProductListSerializer, ProductDeatilSerializer
+from .serializers import ProductListSerializer, ProductDetailSerializer
 from rest_framework.pagination import PageNumberPagination
 from django.db.models import Q
 
@@ -20,7 +20,7 @@ class ProductListApi(generics.ListAPIView):
 
 # This view displays the details of a specific product. The user can view information about the product.
 class ProductDetailApi(generics.RetrieveAPIView):
-    serializer_class = ProductDeatilSerializer
+    serializer_class = ProductListSerializer
     lookup_field = 'id'
 
     def get_queryset(self):
