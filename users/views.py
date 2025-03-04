@@ -12,6 +12,8 @@ from django.shortcuts import get_object_or_404 ,redirect
 from kavenegar import *
 from .forms import VerifyPhoneForm
 from django.urls import reverse 
+from rest_framework_simplejwt.tokens import RefreshToken
+from django.contrib.auth.hashers import check_password
 
 def handle_phone_api(user):
     try:
@@ -93,20 +95,23 @@ class UpdateApiView(RetrieveUpdateAPIView):
     queryset = MemberModel.objects.all()
     serializer_class = UpdateSerializer
 
-class LoginApiView(APIView):
-    serializer_class = LoginSerializer
+class MemberLoginView(APIView):
     def post(self, request):
         username = request.data.get('username')
         password = request.data.get('password')
-
-        user = MemberAuthBackend.authenticate(request, username=username, password=password)
-
-        if user:
-            # Authentication successful
-            return Response({'message': 'Login successful'}, status=status.HTTP_200_OK)
-        else:
-            # Authentication failed
-            return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+        
+        try:
+            member = MemberModel.objects.get(username=username)
+            if check_password(password , member.password):
+                refresh = RefreshToken.for_user(member)
+                return Response({
+                    'access': str(refresh.access_token),
+                    'refresh': str(refresh),
+                })
+        except MemberModel.DoesNotExist:
+            pass
+        
+        return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
         
 class DeleteApiView(RetrieveDestroyAPIView):
     queryset = MemberModel.objects.all()

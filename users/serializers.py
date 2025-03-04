@@ -2,10 +2,26 @@ from rest_framework import serializers
 from .models import MemberModel
 from django.contrib.auth.password_validation import validate_password
 import re
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from django.contrib.auth.models import User
 
 
 
-
+class DualModelTokenObtainPairSerializer(TokenObtainPairSerializer):
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+        
+        # Add custom claims to the JWT payload
+        if isinstance(user, User):
+            token['user_type'] = 'admin'
+        elif isinstance(user, MemberModel):
+            token['user_type'] = 'member'
+        else:
+            raise ValueError("Unknown user model")
+        
+        return token
+    
 class SignupSerializer(serializers.ModelSerializer):
     class Meta:
         model = MemberModel
