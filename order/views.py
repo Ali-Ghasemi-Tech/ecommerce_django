@@ -1,79 +1,94 @@
-from django.shortcuts import render , redirect , get_object_or_404
-from .models import Cart , Product , CartItem ,Order
-from .models import Order, OrderItem
+from django.shortcuts import render, redirect, get_object_or_404
+from .models import Cart, Product, CartItem, Order, Payment, OrderItem
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect
-
+from rest_framework import generics
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from .serializers import CartSerializer, OrderSerializer, PaymentSerializer
 
 # Create your views here.
 
-# ویو سبد خرید نمایش محصولات انتخابی کاربر در سبد خرید را انجام می‌دهد.
-# Shopping cart view displays the products selected by the user in the shopping cart.
-def cart_view(request):
-    cart = Cart.objects.get(user=request.user)  # سبد خرید کاربر جاری
-    return render(request, 'shop/cart.html', {'cart': cart})
+class CartAPIView(APIView):
+    permission_classes = [IsAuthenticated]
 
-# This view allows the user to add a product to her shopping cart.
-#این ویو به کاربر اجازه می‌دهد که محصولی را به سبد خرید خود اضافه کند.
-def add_to_cart(request, product_id):
-    product = get_object_or_404(Product, id=product_id)
-    cart, created = Cart.objects.get_or_create(user=request.user)  # اگر سبد خرید وجود نداشت، ایجاد می‌شود
-    cart_item, created = CartItem.objects.get_or_create(cart=cart, product=product)  # اضافه کردن محصول به سبد
-    cart_item.quantity += 1  # افزایش تعداد محصول در سبد خرید
-    cart_item.save()
-    return redirect('cart')
+    def get(self, request):
+        cart = Cart.objects.get(user=request.user)
+        serializer = CartSerializer(cart)
+        return Response(serializer.data)
 
- #This view allows the user to remove a product from her shopping cart.
-# این ویو به کاربر اجازه می‌دهد که محصولی را از سبد خرید خود حذف کند.
+class AddToCartAPIView(APIView):
+    permission_classes = [IsAuthenticated]
 
-def remove_from_cart(request, cart_item_id):
-    cart_item = get_object_or_404(CartItem, id=cart_item_id)
-    cart_item.delete()  # حذف محصول از سبد خرید
-    return redirect('cart')
+    def post(self, request, product_id):
+        product = get_object_or_404(Product, id=product_id)
+        cart, created = Cart.objects.get_or_create(user=request.user)
+        cart_item, created = CartItem.objects.get_or_create(cart=cart, product=product)
+        cart_item.quantity += 1
+        cart_item.save()
+        return Response({'status': 'Product added to cart'})
 
-# This view is for displaying order details and purchase information.
-# این ویو برای نمایش جزئیات سفارش و اطلاعات مربوط به خرید است.
-def order_view(request, order_id):
-    order = get_object_or_404(Order, id=order_id)
-    return render(request, 'shop/order.html', {'order': order})
+class RemoveFromCartAPIView(APIView):
+    permission_classes = [IsAuthenticated]
 
-# create today satarday
+    def post(self, request, cart_item_id):
+        cart_item = get_object_or_404(CartItem, id=cart_item_id)
+        cart_item.delete()
+        return Response({'status': 'Product removed from cart'})
+
+class OrderAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, order_id):
+        order = get_object_or_404(Order, id=order_id)
+        serializer = OrderSerializer(order)
+        return Response(serializer.data)
+
+class PaymentAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, order_id):
+        order = get_object_or_404(Order, id=order_id)
+        payment = Payment.objects.create(order=order, amount=order.total_price, payment_method='credit_card', status='completed')
+        order.status = 'paid'
+        order.save()
+        serializer = PaymentSerializer(payment)
+        return Response(serializer.data)
 
 @login_required
 def create_order(request):
-    if request.method == "POST":
-        cart = request.session.get('cart', {})  # گرفتن سبد خرید از سشن
-        total_price = sum(item['price'] * item['quantity'] for item in cart.values())
+    cart = Cart.objects.get(user=request.user)
+    order = Order.objects.create(user=request.user, total_price=cart.get_total_price())
+    for item in cart.items.all():
+        OrderItem.objects.create(order=order, product=item.product, quantity=item.quantity, price=item.product.price)
+    cart.items.all().delete()
+    return redirect('order_detail', order_id=order.id)
 
-        # ایجاد سفارش جدید
-        order = Order.objects.create(user=request.user, total_price=total_price)
+@login_required
+def add_to_cart(request, product_id):
+    product = get_object_or_404(Product, id=product_id)
+    cart, created = Cart.objects.get_or_create(user=request.user)
+    cart_item, created = CartItem.objects.get_or_create(cart=cart, product=product)
+    cart_item.quantity += 1
+    cart_item.save()
+    return redirect('cart_detail')
 
-        # اضافه کردن محصولات به سفارش
-        for product_id, item in cart.items():
-            OrderItem.objects.create(
-                order=order,
-                product=item['name'],
-                price=item['price'],
-                quantity=item['quantity']
-            )
+@login_required
+def remove_from_cart(request, cart_item_id):
+    cart_item = get_object_or_404(CartItem, id=cart_item_id)
+    cart_item.delete()
+    return redirect('cart_detail')
 
-        # پاک کردن سبد خرید
-        del request.session['cart']
+@login_required
+def order_view(request, order_id):
+    order = get_object_or_404(Order, id=order_id)
+    return render(request, 'order_detail.html', {'order': order})
 
-        return redirect('order_success', order_id=order.id)
-
-    return render(request, 'create_order.html')
-
-# The payment view shows the payment process and completion of the purchase.
-# ویو پرداخت نمایش فرآیند پرداخت و تکمیل خرید است.
-
+@login_required
 def payment_view(request, order_id):
     order = get_object_or_404(Order, id=order_id)
-    if request.method == 'POST':
-        # انجام عملیات پرداخت (در واقع اینجا فقط نمایش داده می‌شود)
-        payment = Payment.objects.create(order=order, amount=order.total_price, payment_method='credit_card',
-                                         status='completed')
-        order.status = 'paid'
-        order.save()
-        return redirect('order', order_id=order.id)
-    return render(request, 'shop/payment.html', {'order': order})
+    payment = Payment.objects.create(order=order, amount=order.total_price, payment_method='credit_card', status='completed')
+    order.status = 'paid'
+    order.save()
+    return redirect('order_detail', order_id=order.id)
+
