@@ -17,12 +17,14 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import path , include
+from django.conf import settings
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path('members/' , include('users.urls')),
     path('order/' , include('order.urls')),
-
-
-
 ]
+ # اضافه کردن ادرس های دیباگ تولبار
+if settings.DEBUG:  # فقط در حالت DEBUG فعال باشد
+    import debug_toolbar
+    urlpatterns += [path('__debug__/', include(debug_toolbar.urls))]
