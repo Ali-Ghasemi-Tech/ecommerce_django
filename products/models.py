@@ -14,7 +14,7 @@ class Product(models.Model):
     price = models.IntegerField()
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    units_sold = models.PositiveIntegerField()
+    units_sold = models.PositiveIntegerField(default=0)
     active = models.BooleanField(default=True)
     tags = TaggableManager()
     text_content = models.TextField(null=True, blank=True)

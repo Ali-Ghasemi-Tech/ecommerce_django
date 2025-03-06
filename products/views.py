@@ -1,6 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from rest_framework import generics
-
 from .models import Product, Comment
 from .serializers import ProductListSerializer, ProductDetailSerializer, CommentSerializer
 from rest_framework.pagination import PageNumberPagination
@@ -27,13 +26,9 @@ class ProductListApi(generics.ListAPIView):
 
 # This view displays the details of a specific product. The user can view information about the product.
 class ProductDetailApi(generics.RetrieveAPIView):
-<<<<<<< HEAD
     serializer_class = ProductDetailSerializer
     lookup_field = 'product_id'
-=======
-    serializer_class = ProductListSerializer
-    lookup_field = 'id'
->>>>>>> 4e036f739d1a9175c1d1df3238c4667b8a8637c5
+
 
     def get_queryset(self):
         # Use prefetch_related to optimize queries for images, videos, and audios
