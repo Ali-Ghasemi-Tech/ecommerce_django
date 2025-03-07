@@ -10,6 +10,8 @@ class MemberAuthBackend(BaseBackend):
             if check_password(password , member.password):
                 member.last_login = now()
                 member.save()
+                member.backend = f"{self.__module__}.{self.__class__.__name__}"  # Set backend attribute
+
                 return member
         except MemberModel.DoesNotExist:
             return None

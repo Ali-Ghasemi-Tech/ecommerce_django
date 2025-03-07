@@ -1,9 +1,27 @@
 from rest_framework import serializers
 from .models import MemberModel
 from django.contrib.auth.password_validation import validate_password
+import re
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from django.contrib.auth.models import User
 
 
 
+class DualModelTokenObtainPairSerializer(TokenObtainPairSerializer):
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+        
+        # Add custom claims to the JWT payload
+        if isinstance(user, User):
+            token['user_type'] = 'admin'
+        elif isinstance(user, MemberModel):
+            token['user_type'] = 'member'
+        else:
+            raise ValueError("Unknown user model")
+        
+        return token
+    
 class SignupSerializer(serializers.ModelSerializer):
     class Meta:
         model = MemberModel
@@ -45,6 +63,18 @@ class SignupSerializer(serializers.ModelSerializer):
         except serializers.ValidationError as e:
             self.add_error('password' , e.messages)
         return password 
+    
+    def validate_phone_number(self , validated_data):
+        phone_number = validated_data
+        regex = r"^(09)(14|13|12|19|18|17|15|16|11|10|90|91|92|93|94|95|96|32|30|33|35|36|37|38|39|00|01|02|03|04|05|41|20|21|22|23|31|34)\d{7}$"
+
+        if not phone_number.isdigit():
+            raise serializers.ValidationError('phone number should only contain digits')
+        if len(phone_number) != 11:
+            raise serializers.ValidationError('phone number should be 11 digits long')
+        if not re.match(regex, phone_number):
+            raise serializers.ValidationError('Invalid phone number')
+        return phone_number
 
     def validate(self, attrs):
         password = attrs.get('password')
@@ -65,12 +95,18 @@ class SignupSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         print(type(validated_data))
+        email = None
+        if validated_data['email'] == '':
+            email = None
+        else:
+            email = validated_data['email']
         member = MemberModel.objects.create(
             username=validated_data['username'],
             firstname = validated_data['firstname'],
             lastname = validated_data['lastname'],
             password=validated_data['password'] ,
-            email = validated_data['email'],
+            email = email,
+            phone_number = validated_data['phone_number'],
         )
         member.save()
         return member
@@ -120,3 +156,13 @@ class MemberSerializer(serializers.ModelSerializer):
         model = MemberModel
         fields = '__all__' 
        
+
+class VerifyPhoneSerializer(serializers.Serializer):
+    token = serializers.CharField(
+        required=True,
+        max_length=100,
+        error_messages={
+            'required': 'Token is required',
+            'max_length': 'Token is too long (max 100 characters)'
+        }
+    )
