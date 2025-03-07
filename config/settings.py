@@ -57,7 +57,6 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'kavenegar',
-    'rest_framework_simplejwt',
 ]
 
 MIDDLEWARE = [
@@ -107,17 +106,12 @@ DATABASES = {
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'users.authentication.DualModelJWTAuthentication',  
         'rest_framework.authentication.SessionAuthentication',
     )
     
 }
 
-SIMPLE_JWT = {
-    'TOKEN_OBTAIN_SERIALIZER': 'your_app.serializers.DualModelTokenObtainPairSerializer',
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
-}
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators

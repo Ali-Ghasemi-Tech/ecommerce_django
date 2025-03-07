@@ -14,6 +14,7 @@ from .forms import VerifyPhoneForm
 from django.urls import reverse 
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.hashers import check_password
+from django.contrib.auth import login, logout
 
 def handle_phone_api(user):
     try:
@@ -95,23 +96,30 @@ class UpdateApiView(RetrieveUpdateAPIView):
     queryset = MemberModel.objects.all()
     serializer_class = UpdateSerializer
 
-class MemberLoginView(APIView):
+class LoginApiView(APIView):
+    serializer_class = LoginSerializer
     def post(self, request):
         username = request.data.get('username')
         password = request.data.get('password')
+
+        user = MemberAuthBackend.authenticate(request, username=username, password=password)
+
+        if user:
+            # Authentication successful
+            login(request , user , backend= 'users.backends.MemberAuthBackend')
+            return Response({'message': 'Login successful'}, status=status.HTTP_200_OK)
+        else:
+            # Authentication failed
+            return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
         
-        try:
-            member = MemberModel.objects.get(username=username)
-            if check_password(password , member.password):
-                refresh = RefreshToken.for_user(member)
-                return Response({
-                    'access': str(refresh.access_token),
-                    'refresh': str(refresh),
-                })
-        except MemberModel.DoesNotExist:
-            pass
-        
-        return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+class LogoutApiView(APIView):
+    def post(self, request):
+        if request.user.is_authenticated:
+            logout(request)  # Destroys the session
+            return Response({'message': 'success'} , status=status.HTTP_200_OK)
+        else:
+            return Response({'message': 'not logged in'}, status=status.HTTP_400_BAD_REQUEST)
+
         
 class DeleteApiView(RetrieveDestroyAPIView):
     queryset = MemberModel.objects.all()

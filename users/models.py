@@ -21,6 +21,14 @@ class MemberModel(models.Model):
         if not self.pk:
             self.password = make_password(self.password)
         super().save(*args , **kwargs)
+
+    @property
+    def is_authenticated(self):
+        return True  # Or implement logic based on `is_active`
+
+    @property
+    def is_anonymous(self):
+        return False
         
 
 class Profile(models.Model):
