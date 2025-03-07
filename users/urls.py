@@ -1,6 +1,7 @@
 from django.urls import path , include
 from . import views
 urlpatterns =[
+    path('' , include('rest_framework.urls')),
     path('api/signup/' , views.SignupApiView.as_view() , name='signup_api'),
     path('api/verify-email/<str:token>/', views.VerifyEmailView.as_view(), name='verify_email'),
     path('api/verify-phone/', views.VerifyPhoneView.as_view(), name='verify_phone'),

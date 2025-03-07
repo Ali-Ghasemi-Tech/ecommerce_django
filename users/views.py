@@ -14,7 +14,7 @@ from .forms import VerifyPhoneForm
 from django.urls import reverse 
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.hashers import check_password
-from django.contrib.auth import login, logout
+from django.contrib.auth import login, logout 
 
 def handle_phone_api(user):
     try:
@@ -101,6 +101,7 @@ class UpdateApiView(RetrieveUpdateAPIView):
 
 class LoginApiView(APIView):
     serializer_class = LoginSerializer
+
     def post(self, request):
         username = request.data.get('username')
         password = request.data.get('password')

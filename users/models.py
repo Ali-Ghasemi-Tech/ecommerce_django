@@ -22,6 +22,7 @@ class MemberModel(models.Model):
             self.password = make_password(self.password)
         super().save(*args , **kwargs)
 
+
     @property
     def is_authenticated(self):
         return True  # Or implement logic based on `is_active`
@@ -29,6 +30,12 @@ class MemberModel(models.Model):
     @property
     def is_anonymous(self):
         return False
+    
+    def __repr__(self):
+        return self.username
+    
+    def __str__(self):
+        return self.username
         
 
 class Profile(models.Model):

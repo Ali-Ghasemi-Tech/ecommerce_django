@@ -6,22 +6,7 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.contrib.auth.models import User
 
 
-
-class DualModelTokenObtainPairSerializer(TokenObtainPairSerializer):
-    @classmethod
-    def get_token(cls, user):
-        token = super().get_token(user)
-        
-        # Add custom claims to the JWT payload
-        if isinstance(user, User):
-            token['user_type'] = 'admin'
-        elif isinstance(user, MemberModel):
-            token['user_type'] = 'member'
-        else:
-            raise ValueError("Unknown user model")
-        
-        return token
-    
+ 
 class SignupSerializer(serializers.ModelSerializer):
     class Meta:
         model = MemberModel
@@ -111,6 +96,10 @@ class SignupSerializer(serializers.ModelSerializer):
         member.save()
         return member
         
+class MemberModelSerailizer(serializers.ModelSerializer):
+    class Meta:
+        model = MemberModel
+        fields = ['id' , 'username']
 
 class UpdateSerializer(serializers.ModelSerializer):
     class Meta:
