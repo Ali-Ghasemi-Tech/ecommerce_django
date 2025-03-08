@@ -27,18 +27,11 @@ class OrderItem(models.Model):
     def __str__(self):
         return f"{self.quantity} x {self.product.name}"
 
-# The shopping cart model is for storing the products selected by the user until finalizing the purchase.
-class Cart(models.Model):
-    user = models.ForeignKey(MemberModel, on_delete=models.CASCADE)
-    created_at = models.DateTimeField(auto_now_add=True)
-    
-    def __str__(self):
-        return f"Cart for {self.user.username}"
 
 # This model is used to store each item in the user's shopping cart.
-class CartItem(models.Model):
-    cart = models.ForeignKey(Cart, related_name='items', on_delete=models.CASCADE)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+class Cart(models.Model):
+    user = models.ForeignKey(MemberModel, on_delete=models.CASCADE)
+    product = models.ManyToManyField(Product, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField()
 
     def __str__(self):

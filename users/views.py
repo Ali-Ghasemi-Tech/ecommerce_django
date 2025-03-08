@@ -86,6 +86,7 @@ class VerifyPhoneView(APIView):
             profile = Profile.objects.get(phone_verification_token=token)
             user = profile.user
             user.is_active = True
+            
             user.save()
             return Response({"message": "Phone number verified successfully."}, status=status.HTTP_200_OK)
         except Profile.DoesNotExist:
