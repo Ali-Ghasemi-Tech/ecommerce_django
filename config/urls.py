@@ -22,8 +22,9 @@ from django.conf import settings
 urlpatterns = [
     
     path("admin/", admin.site.urls),
-    path('members/' , include('users.urls')),
-    path('order/' , include('order.urls')),
+    path('api/members/' , include('users.urls')),
+    path('api/order/' , include('order.urls')),
+    path('api/products/' , include('products.urls')),
 ]
  # اضافه کردن ادرس های دیباگ تولبار
 if settings.DEBUG:  # فقط در حالت DEBUG فعال باشد

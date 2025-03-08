@@ -25,7 +25,7 @@ class Product(models.Model):
     
 class ProductImage(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='images')
-    image = models.ImageField(upload_to='product/images')
+    image = models.ImageField(upload_to='media/product/images')
 
     def __str__(self):
         return f"Image for {self.product.name}"
@@ -33,7 +33,7 @@ class ProductImage(models.Model):
 
 class ProductVideo(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='videos')
-    video = models.FileField(upload_to='product/videos')
+    video = models.FileField(upload_to='media/product/videos')
 
     def __str__(self):
         return f"Video for {self.product.name}"
@@ -41,7 +41,7 @@ class ProductVideo(models.Model):
 
 class ProductAudio(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='audios')
-    audio = models.FileField(upload_to='product/audios')
+    audio = models.FileField(upload_to='media/product/audios')
 
     def __str__(self):
         return f"Audio for {self.product.name}"

@@ -12,7 +12,6 @@ from django.shortcuts import get_object_or_404 ,redirect
 from kavenegar import *
 from .forms import VerifyPhoneForm
 from django.urls import reverse 
-from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.hashers import check_password
 from django.contrib.auth import login, logout 
 
@@ -25,7 +24,7 @@ def handle_phone_api(user):
 
     try:
         api = KavenegarAPI('32354D4E2F3631306B4C796D5861574E4D5970634346497034614A463555424F774E3536472B46685545383D')
-        params = { 'sender' : '2000660110', 'receptor': '09212155738', 'message' :f'برای تایید شماره تلقن خود کد زیر را در سابت واردکنید: {code}' }
+        params = { 'sender' : '2000660110', 'receptor': f'{user.phone_number}', 'message' :f'برای تایید شماره تلفن خود، کد زیر را در سایت واردکنید: {code}' }
         response = api.sms_send(params)
     except APIException as e: 
         print(e)

@@ -39,6 +39,14 @@ class ProductDetailApi(generics.RetrieveAPIView):
         if hasattr(self, 'request'):
             context['request'] = self.request
         return context
+    
+    # def post(self):
+    #     # product = Product.objects.filter(id = product_id)
+    #     user = self.request.user
+    #     if not user == self.get_queryset().filter(users = user):
+    #         pass
+            
+            
 
 
 class CommentListCreateView(generics.ListCreateAPIView):
