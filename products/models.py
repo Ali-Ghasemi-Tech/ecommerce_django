@@ -1,5 +1,5 @@
 from django.db import models
-from users.models import MemberModel
+from account.models import Account
 from django.core.validators import MinValueValidator, MaxValueValidator
 from taggit.managers import TaggableManager
 
@@ -18,7 +18,7 @@ class Product(models.Model):
     active = models.BooleanField(default=True)
     tags = TaggableManager()
     text_content = models.TextField(null=True, blank=True)
-    users = models.ManyToManyField(MemberModel, related_name='users')
+    users = models.ManyToManyField(Account, related_name='users')
 
     def __str__(self):
         return self.name
@@ -53,7 +53,7 @@ class ProductAudio(models.Model):
 
 class Comment(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    user = models.ForeignKey(MemberModel, on_delete=models.CASCADE)
+    user = models.ForeignKey(Account, on_delete=models.CASCADE)
     rating = models.PositiveIntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
     comment = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)

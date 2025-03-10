@@ -1,14 +1,14 @@
 from django.db import models
 from django.contrib.auth.models import User
-from users.models import MemberModel
 from products.models import Product
+from account.models import Account
 
 # Create your models here.
 
 # The order model is for storing information related to the user's final purchase.
 class Order(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    customer = models.ForeignKey(MemberModel, on_delete=models.CASCADE,default=1)
+    customer = models.ForeignKey(Account, on_delete=models.CASCADE,default=1)
     quantity = models.IntegerField(default=1)
     date = models.DateTimeField(auto_now_add=True)
     status = models.BooleanField(default=False)
@@ -30,8 +30,8 @@ class OrderItem(models.Model):
 
 # This model is used to store each item in the user's shopping cart.
 class Cart(models.Model):
-    user = models.ForeignKey(MemberModel, on_delete=models.CASCADE)
-    product = models.ManyToManyField(Product, on_delete=models.CASCADE)
+    user = models.ForeignKey(Account, on_delete=models.CASCADE)
+    product = models.ManyToManyField(Product)
     quantity = models.PositiveIntegerField()
 
     def __str__(self):

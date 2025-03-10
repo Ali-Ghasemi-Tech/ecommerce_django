@@ -1,16 +1,13 @@
 from rest_framework import serializers
-from .models import MemberModel
 from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
 import re
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from django.contrib.auth.models import User
+from .models import Account
 
-
- 
 class SignupSerializer(serializers.ModelSerializer):
     class Meta:
-        model = MemberModel
-        exclude = ['is_active' , 'last_login']
+        model = Account
+        exclude = ['is_active' , 'last_login' , 'is_staff' , 'is_superuser' , 'date_joined' , 'groups' , 'user_permissions'] 
         extra_kwargs = {
             'password': {'write_only': True},  # Ensure password is write-only
         }
@@ -85,67 +82,17 @@ class SignupSerializer(serializers.ModelSerializer):
             email = None
         else:
             email = validated_data['email']
-        member = MemberModel.objects.create(
+        member = Account.objects.create(
             username=validated_data['username'],
-            firstname = validated_data['firstname'],
-            lastname = validated_data['lastname'],
+            first_name = validated_data['first_name'],
+            last_name = validated_data['last_name'],
             password=validated_data['password'] ,
             email = email,
             phone_number = validated_data['phone_number'],
         )
         member.save()
         return member
-        
-class MemberModelSerailizer(serializers.ModelSerializer):
-    class Meta:
-        model = MemberModel
-        fields = ['id' , 'username']
-
-class UpdateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = MemberModel
-        fields = ['firstname', 'lastname', 'username']
-
-    def validate_username(self, value):
-        if not value.isalnum() and '_' not in value:
-            raise serializers.ValidationError("Username should only contain alphabetic characters or underscore!")
-        if value[0].isdigit():
-            raise serializers.ValidationError("Username cannot start with a digit")
-        return value
-
-    def validate_first_name(self, value):
-        if not value.isalpha(): 
-            raise serializers.ValidationError("First name should only contain alphabetic characters")
-        return value
-
-    def validate_last_name(self, value):
-        if not value.isalpha(): 
-            raise serializers.ValidationError("Last name should only contain alphabetic characters")
-        return value 
-
-
-    def update(self, instance, validated_data):
-        """
-        Update the MemberModel instance.
-        """
-        instance.firstname = validated_data.get('firstname', instance.firstname)
-        instance.lastname = validated_data.get('lastname', instance.lastname)
-        instance.username = validated_data.get('username', instance.username)
-        instance.save()
-        return instance
-
-class LoginSerializer(serializers.ModelSerializer):
-    class Meta: 
-        model = MemberModel
-        fields = ['username' , 'password']
-
-
-class MemberSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = MemberModel
-        fields = '__all__' 
-       
-
+    
 class VerifyPhoneSerializer(serializers.Serializer):
     token = serializers.CharField(
         required=True,
@@ -155,3 +102,19 @@ class VerifyPhoneSerializer(serializers.Serializer):
             'max_length': 'Token is too long (max 100 characters)'
         }
     )
+
+class LoginSerializer(serializers.ModelSerializer):
+   class Meta:
+       model = Account
+       fields = ['username', 'password']
+
+class AccountUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Account
+        fields = ['email', 'first_name', 'last_name', 'phone_number']
+        # Prevent username from being updated
+        read_only_fields = ['username']
+
+class PasswordChangeSerializer(serializers.Serializer):
+    old_password = serializers.CharField(required=True)
+    new_password = serializers.CharField(required=True)

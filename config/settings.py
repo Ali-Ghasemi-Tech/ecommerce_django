@@ -48,16 +48,16 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     #loacal
-    'users',
     'products',
     'order',
-    'debug_toolbar',
-
+    'account',
 
     #3rd party
     'rest_framework',
     'taggit',
     'kavenegar',
+    'debug_toolbar',
+
 ]
 
 MIDDLEWARE = [
@@ -109,7 +109,11 @@ DATABASES = {
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.SessionAuthentication',
-    )
+    ),
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',  # Ensure this is included
+    ],
     
 }
 
@@ -184,3 +188,5 @@ DEBUG_TOOLBAR_PANELS = [
     'debug_toolbar.panels.logging.LoggingPanel',
     'debug_toolbar.panels.redirects.RedirectsPanel',
 ]
+
+AUTH_USER_MODEL = 'account.Account'
