@@ -82,7 +82,9 @@ class LoginApiView(APIView):
         username = request.data.get('username')
         password = request.data.get('password')
 
+
         user = authenticate(request, username=username, password=password)
+ 
 
         if user:
             # Authentication successful
@@ -90,7 +92,7 @@ class LoginApiView(APIView):
             return Response({'message': 'Login successful'}, status=status.HTTP_200_OK)
         else:
             # Authentication failed
-            return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response({'error': 'Invalid credentials or phone not verified'}, status=status.HTTP_401_UNAUTHORIZED)
 
 class UpdateApiView(RetrieveUpdateAPIView):
     queryset = Account.objects.all()

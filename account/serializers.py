@@ -75,22 +75,27 @@ class SignupSerializer(serializers.ModelSerializer):
     confirm_password = serializers.CharField(style={'input_type': 'password'}, write_only=True)
 
 
+
+    
     def create(self, validated_data):
-        print(type(validated_data))
-        email = None
-        if validated_data['email'] == '':
-            email = None
-        else:
-            email = validated_data['email']
+    # Remove password from validated_data first
+        raw_password = validated_data.pop('password')
+        validated_data.pop('confirm_password')  # Remove confirm_password too
+
+        # Create the user WITHOUT setting the password directly
         member = Account.objects.create(
             username=validated_data['username'],
-            first_name = validated_data['first_name'],
-            last_name = validated_data['last_name'],
-            password=validated_data['password'] ,
-            email = email,
-            phone_number = validated_data['phone_number'],
+            first_name=validated_data['first_name'],
+            last_name=validated_data['last_name'],
+            email=validated_data.get('email', None),
+            phone_number=validated_data['phone_number'],
+            # Don't pass password here
         )
+
+        # Hash the password properly
+        member.set_password(raw_password)  # <-- This does the hashing
         member.save()
+
         return member
     
 class VerifyPhoneSerializer(serializers.Serializer):
