@@ -19,6 +19,7 @@ def handle_phone_api(user):
         profile = Profile.objects.get(user=user)
     except:
         profile = Profile.objects.create(user=user)
+        
     code = profile.generate_phone_verification_token()
 
     try:
@@ -33,6 +34,7 @@ def handle_phone_api(user):
 class SignupApiView(ListCreateAPIView):
     serializer_class = SignupSerializer
 
+    # remove for production
     def get_queryset(self):
         if self.request.user.is_superuser or self.request.user.is_staff:
             return Account.objects.all()
@@ -54,6 +56,7 @@ class SignupApiView(ListCreateAPIView):
 
 class VerifyPhoneView(APIView):
     serializer_class = VerifyPhoneSerializer
+    
     def post(self, request):
         serializer = VerifyPhoneSerializer(data=request.data)
         

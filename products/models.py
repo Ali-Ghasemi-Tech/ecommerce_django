@@ -18,7 +18,7 @@ class Product(models.Model):
     active = models.BooleanField(default=True)
     tags = TaggableManager()
     text_content = models.TextField(null=True, blank=True)
-    users = models.ManyToManyField(Account, related_name='users')
+    users = models.ManyToManyField(Account, related_name='users' , blank=True , null= True)
 
     def __str__(self):
         return self.name
