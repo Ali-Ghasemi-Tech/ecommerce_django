@@ -32,7 +32,7 @@ class OrderItem(models.Model):
 class Cart(models.Model):
     user = models.ForeignKey(Account, on_delete=models.CASCADE)
     product = models.ManyToManyField(Product)
-    quantity = models.PositiveIntegerField()
+    quantity = models.PositiveIntegerField(default= 0)
 
     def __str__(self):
         return f"{self.quantity} x {self.product.name}"

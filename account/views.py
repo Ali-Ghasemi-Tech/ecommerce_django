@@ -10,6 +10,7 @@ from rest_framework.views import APIView
 from .serializers import VerifyPhoneSerializer
 from django.contrib.auth import authenticate, login , logout
 from rest_framework.decorators import action
+from order.models import Cart
 
 
 
@@ -69,6 +70,8 @@ class VerifyPhoneView(APIView):
             user.is_active = True
             
             user.save()
+
+            Cart.objects.create(user=user)
             return Response({"message": "Phone number verified successfully."}, status=status.HTTP_200_OK)
         except Profile.DoesNotExist:
             
