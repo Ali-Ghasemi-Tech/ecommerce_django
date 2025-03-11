@@ -1,9 +1,12 @@
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
 from django.db import models
 from django.utils import timezone
+from datetime import timedelta , datetime
 from django.contrib.auth.hashers import make_password
-
 import uuid
+
+current_time = timezone.localtime(timezone.now())
+naive_time = datetime.now()
 
 class UserManager(BaseUserManager):
     def create_user(self, username, phone_number, password=None, **extra_fields):
@@ -61,10 +64,15 @@ class Account(AbstractBaseUser, PermissionsMixin):
         super().save(*args , **kwargs)
     
 
+def expire_date():
+    return timezone.now() + timezone.timedelta(minutes=5)
+
 class Profile(models.Model):
     user = models.OneToOneField(Account , on_delete=models.CASCADE)
     email_verification_token = models.CharField(max_length=255 , blank=True , null= True)
     phone_verification_token = models.CharField(max_length=255 , blank=True , null= True)
+    verification_uuid = models.UUIDField(default=uuid.uuid4 , unique= True , editable= False)
+    expire = models.DateTimeField(default=expire_date())
     
     def generate_verification_token(self):
         self.email_verification_token = str(uuid.uuid4())
@@ -73,6 +81,9 @@ class Profile(models.Model):
 
     def generate_phone_verification_token(self):
         verification_token = str(uuid.uuid4())
-        self.phone_verification_token = verification_token[0:4]
+        self.phone_verification_token = verification_token[0:5]
         self.save()
         return self.phone_verification_token
+    
+    def get_local_start_time(self):
+        return timezone.localtime(self.expire)

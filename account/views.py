@@ -11,21 +11,23 @@ from .serializers import VerifyPhoneSerializer
 from django.contrib.auth import authenticate, login , logout
 from rest_framework.decorators import action
 from order.models import Cart
+from django.utils import timezone
 
 
 
 def handle_phone_api(user):
     try:
         profile = Profile.objects.get(user=user)
+        code = profile.phone_verification_token
     except:
         profile = Profile.objects.create(user=user)
-        
-    code = profile.generate_phone_verification_token()
+        code = profile.generate_phone_verification_token()
 
     try:
         api = KavenegarAPI('32354D4E2F3631306B4C796D5861574E4D5970634346497034614A463555424F774E3536472B46685545383D')
         params = { 'sender' : '2000660110', 'receptor': f'{user.phone_number}', 'message' :f'برای تایید شماره تلفن خود، کد زیر را در سایت واردکنید: {code}' }
-        response = api.sms_send(params)
+        api.sms_send(params)
+        profile.expire = timezone.now() + timezone.timedelta(minutes=6)
     except APIException as e: 
         print(e)
     except HTTPException as e: 
@@ -40,24 +42,26 @@ class SignupApiView(ListCreateAPIView):
             return Account.objects.all()
         else:
             try:
-                return Account.objects.get(pk = self.request.user.id)
+                return []
             except Account.DoesNotExist:
-                return Account.objects.none()
+                return []
 
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
             handle_phone_api(user)  # Your existing phone verification logic
-            return Response({'redirect': reverse('verify_phone')}, status=status.HTTP_201_CREATED)
+            profile = Profile.objects.get(user=user)
+            return redirect(reverse("verify_phone", kwargs={"verification_uuid": profile.verification_uuid}))
           
-        return Response( status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 
 class VerifyPhoneView(APIView):
     serializer_class = VerifyPhoneSerializer
+    lookup_url_kwargs = 'verification_uuid'
     
-    def post(self, request):
+    def post(self, request , verification_uuid):
         serializer = VerifyPhoneSerializer(data=request.data)
         
         if not serializer.is_valid():
@@ -68,14 +72,18 @@ class VerifyPhoneView(APIView):
 
         token = serializer.validated_data['token']
         try:
-            profile = Profile.objects.get(phone_verification_token=token)
-            user = profile.user
-            user.is_active = True
+            profile = Profile.objects.get(phone_verification_token=token ,verification_uuid=verification_uuid)
             
-            user.save()
-
-            Cart.objects.create(user=user)
-            return Response({"message": "Phone number verified successfully."}, status=status.HTTP_200_OK)
+          
+            if profile.expire < timezone.now():
+                profile.delete()
+                return Response({"error": "Token expired , request for another one"}, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                user = profile.user
+                user.is_active = True
+                user.save()
+                Cart.objects.create(user=user)
+                return Response({"message": "Phone number verified successfully."}, status=status.HTTP_200_OK)
         except Profile.DoesNotExist:
             
             return Response({"error": f"Invalid token {token}"}, status=status.HTTP_400_BAD_REQUEST)

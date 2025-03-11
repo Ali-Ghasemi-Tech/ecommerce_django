@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Account
+from .models import Account , Profile
 
 # Register your models here.
 
@@ -10,3 +10,4 @@ class CustomeUserAdmin(admin.ModelAdmin):
     filter_horizontal = ['groups' , 'user_permissions']
 
 admin.site.register(Account , CustomeUserAdmin)
+admin.site.register(Profile)
