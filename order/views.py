@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Cart, Product, Order, Payment, OrderItem
+from .models import  Product, Order, Payment, OrderItem
 from django.contrib.auth.decorators import login_required
 from rest_framework import generics, viewsets, permissions
 from rest_framework.views import APIView
@@ -19,7 +19,7 @@ from .serializers import CartSerializer, OrderSerializer, PaymentSerializer, Ord
     
 #     def get_queryset(self):
 #         try:
-#             cart = Cart.objects.get(user=self.request.user)
+#             cart = Order.objects.get(user=self.request.user)
 #             return cart
 #         except Exception as e:
 #             return None
@@ -31,8 +31,8 @@ from .serializers import CartSerializer, OrderSerializer, PaymentSerializer, Ord
 
 #     def post(self, request, product_id):
 #         product = get_object_or_404(Product, id=product_id)
-#         cart, created = Cart.objects.get_or_create(user=request.user)
-#         cart_item, created = Cart.objects.get_or_create(cart=cart, product=product)
+#         cart, created = Order.objects.get_or_create(user=request.user)
+#         cart_item, created = Order.objects.get_or_create(cart=cart, product=product)
 #         cart_item.quantity += 1
 #         cart_item.save()
 #         return Response({'status': 'Product added to cart'})
@@ -42,8 +42,8 @@ class AddToCartAPIView(APIView):
 
     def post(self, request, product_id):
         product = get_object_or_404(Product, id=product_id)
-        cart, created = Cart.objects.get_or_create(user=request.user)
-        cart_item, created = Cart.objects.get_or_create(cart=cart, product=product)
+        cart, created = Order.objects.get_or_create(user=request.user)
+        cart_item, created = Order.objects.get_or_create(cart=cart, product=product)
         cart_item.save()
         return Response({'status': 'Product added to cart'} )
 
@@ -51,7 +51,7 @@ class RemoveFromCartAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, cart_item_id):
-        cart_item = get_object_or_404(Cart, id=cart_item_id)
+        cart_item = get_object_or_404(Order, id=cart_item_id)
         cart_item.delete()
         return Response({'status': 'Product removed from cart'})
 
@@ -81,8 +81,8 @@ class CartAPIView(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        cart = Cart.objects.get(user=user)
-        return Cart.objects.filter(cart = cart)
+        cart = Order.objects.get(user=user)
+        return Order.objects.filter(cart = cart)
     
     def list(self, request, *args, **kwargs):
         try:

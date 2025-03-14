@@ -109,9 +109,21 @@ class VerifyPhoneSerializer(serializers.Serializer):
     )
 
 class LoginSerializer(serializers.ModelSerializer):
-   class Meta:
-       model = Account
-       fields = ['username', 'password']
+    email_or_phone_or_username = serializers.CharField(required=True)
+    password = serializers.CharField(style={'input_type': 'password'})
+
+    class Meta:
+        model = Account
+        fields = ['email_or_phone_or_username', 'password']
+
+    def validate(self, attrs):
+        email_or_phone_or_username = attrs.get('email_or_phone_or_username')
+        password = attrs.get('password')
+
+        if not '@' in email_or_phone_or_username:
+            attrs['email_or_phone'] = ''.join(filter(str.isdigit, email_or_phone_or_username))
+
+        return attrs
 
 class AccountUpdateSerializer(serializers.ModelSerializer):
     class Meta:

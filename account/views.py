@@ -10,8 +10,8 @@ from rest_framework.views import APIView
 from .serializers import VerifyPhoneSerializer
 from django.contrib.auth import authenticate, login , logout
 from rest_framework.decorators import action
-from order.models import Cart
 from django.utils import timezone
+from rest_framework import serializers
 
 
 
@@ -82,7 +82,6 @@ class VerifyPhoneView(APIView):
                 user = profile.user
                 user.is_active = True
                 user.save()
-                Cart.objects.create(user=user)
                 return Response({"message": "Phone number verified successfully."}, status=status.HTTP_200_OK)
         except Profile.DoesNotExist:
             
@@ -93,20 +92,22 @@ class LoginApiView(APIView):
     serializer_class = LoginSerializer
 
     def post(self, request):
-        username = request.data.get('username')
-        password = request.data.get('password')
+        serializer = LoginSerializer(data=request.data)
+        if serializer.is_valid():
+            email_or_phone_or_username = serializer.validated_data['email_or_phone_or_username']
+            password = serializer.validated_data['password']
 
 
-        user = authenticate(request, username=username, password=password)
- 
+            user = authenticate(request, username=email_or_phone_or_username, password=password)
+    
 
-        if user:
-            # Authentication successful
-            login(request , user)
-            return Response({'message': 'Login successful'}, status=status.HTTP_200_OK)
-        else:
-            # Authentication failed
-            return Response({'error': 'Invalid credentials or phone not verified'}, status=status.HTTP_401_UNAUTHORIZED)
+            if user:
+                # Authentication successful
+                login(request , user)
+                return Response({'message': 'Login successful'}, status=status.HTTP_200_OK)
+            else:
+                # Authentication failed
+                return Response({'error': 'Invalid credentials or phone not verified'}, status=status.HTTP_401_UNAUTHORIZED)
 
 class UpdateApiView(RetrieveUpdateAPIView):
     queryset = Account.objects.all()
