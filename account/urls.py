@@ -7,6 +7,7 @@ from . import views
 urlpatterns = [
     path('auth/', include('rest_framework.urls')),
     path('signup/', views.SignupApiView.as_view(), name='signup'),
+    path('api/verify-email/<str:token>/', views.VerifyEmailView.as_view(), name='verify_email'),
     path('verify_phone/<uuid:verification_uuid>', views.VerifyPhoneView.as_view(), name='verify_phone'),
     path('login/' , views.LoginApiView.as_view() , name='login_api'),
     path('logout/' , views.LogoutApiView.as_view() , name= 'logout_api'),

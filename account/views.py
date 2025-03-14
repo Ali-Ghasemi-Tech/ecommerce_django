@@ -1,7 +1,7 @@
 from rest_framework.generics import ListCreateAPIView ,RetrieveUpdateAPIView
 from rest_framework import status , viewsets , permissions
 from rest_framework.response import Response
-from django.shortcuts import redirect
+from django.shortcuts import redirect , get_object_or_404
 from django.urls import reverse
 from kavenegar import *
 from .models import Account , Profile
@@ -12,7 +12,23 @@ from django.contrib.auth import authenticate, login , logout
 from rest_framework.decorators import action
 from django.utils import timezone
 from rest_framework import serializers
+from django.conf import settings
+from django.core.mail import send_mail
 
+def handle_email_api(user):
+    try:
+        profile = Profile.objects.get(user=user)
+        token = profile.generate_verification_token()
+        verification_link = f"http://127.0.0.1:8000/members/api/verify-email/{token}/"
+        send_mail(
+        'Verify your email',
+        f'Click the link to verify your email: {verification_link}',
+        settings.EMAIL_HOST_USER,
+        [user.email],
+        fail_silently=False,
+        )
+    except Exception:
+        Response({'message':'there was a problem with sending the email'} , status=status.HTTP_503_SERVICE_UNAVAILABLE)
 
 
 def handle_phone_api(user):
@@ -50,12 +66,35 @@ class SignupApiView(ListCreateAPIView):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
-            handle_phone_api(user)  # Your existing phone verification logic
-            profile = Profile.objects.get(user=user)
-            return redirect(reverse("verify_phone", kwargs={"verification_uuid": profile.verification_uuid}))
+            # send verification code to user (email or phone)
+            if serializer.validated_data['phone_number'] and serializer.validated_data['email']:
+                handle_phone_api(user)
+                handle_email_api(user)
+                profile = Profile.objects.get(user=user)
+                return redirect(reverse("verify_phone", kwargs={"verification_uuid": profile.verification_uuid}))
+            
+            elif serializer.validated_data['phone_number']:
+                handle_phone_api(user) 
+                profile = Profile.objects.get(user=user)
+                return redirect(reverse("verify_phone", kwargs={"verification_uuid": profile.verification_uuid}))
+            
+            elif serializer.validated_data['email']:
+                handle_email_api(user)
+                Response({'message' : "vrificatin link has been sent to your email"} , status=status.HTTP_200_OK)
+
+            
+            
           
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
+class VerifyEmailView(APIView):
+    def get(self, token):
+        profile = get_object_or_404(Profile, email_verification_token=token)
+        user = profile.user
+        user.is_active = True
+        user.save()
+        return Response({"message": "Email verified successfully."}, status=status.HTTP_200_OK)
+
 
 class VerifyPhoneView(APIView):
     serializer_class = VerifyPhoneSerializer
