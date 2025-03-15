@@ -1,35 +1,21 @@
 from rest_framework import serializers
-from .models import Order, Payment, OrderItem
-
-class CartSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Order
-        fields = ['product', 'quantity']
-
-class CartSerializer(serializers.ModelSerializer):
-    items = CartSerializer(many=True)
-
-    class Meta:
-        model = Order
-        fields = ['user', 'created_at', 'items']
+from .models import OrderItem , Order
+from products.serializers import ProductDetailSerializer 
+from account.models import Account
 
 class OrderItemSerializer(serializers.ModelSerializer):
+    product = ProductDetailSerializer(read_only=True)  
+
     class Meta:
         model = OrderItem
-        fields = ['product', 'quantity', 'price']
+        fields = ['product', 'access_expiry_date']
 
 class OrderSerializer(serializers.ModelSerializer):
-    items = OrderItemSerializer(many=True)
+    items = OrderItemSerializer(many=True, read_only=True)  
+    #customer = serializers.PrimaryKeyRelatedField(queryset=Account.objects.all())  # فیلد customer
 
     class Meta:
         model = Order
-fields = ['user', 'total_price', 'status', 'items']
-class PaymentSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Payment
-        fields = ['order', 'payment_date', 'amount', 'payment_method', 'status']
+        fields = ['customer', 'date', 'status', 'total_price', 'items']
 
-class CartListSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Order
-        fields = "__all__"
+
