@@ -9,8 +9,8 @@ class EmailOrPhoneBackend(ModelBackend):
             # Check if input is email/phone and sanitize
             user = Account.objects.get(
                 Q(username=username) |
-                Q(email=username) | 
-                Q(phone_number=username)
+                (Q(email=username) & Q(email_active = True)) | 
+                (Q(phone_number=username) & Q(phone_number_active = True))
             )
             if user.check_password(password):
                 return user
