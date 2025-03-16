@@ -91,6 +91,7 @@ class VerifyEmailView(APIView):
     def get(self, token):
         profile = get_object_or_404(Profile, email_verification_token=token)
         user = profile.user
+        user.email_verified = True
         user.is_active = True
         user.save()
         return Response({"message": "Email verified successfully."}, status=status.HTTP_200_OK)
@@ -119,6 +120,7 @@ class VerifyPhoneView(APIView):
                 return Response({"error": "Token expired , request for another one"}, status=status.HTTP_400_BAD_REQUEST)
             else:
                 user = profile.user
+                user.phone_verified = True
                 user.is_active = True
                 user.save()
                 return Response({"message": "Phone number verified successfully."}, status=status.HTTP_200_OK)
