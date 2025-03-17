@@ -5,10 +5,14 @@ from django.db.models import Avg
 
 class ProductListSerializer(serializers.ModelSerializer):
     image = serializers.SerializerMethodField()
+    tags = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
-        fields = ('name', 'description', 'unit_price', 'tags', 'units_sold', 'image')
+        fields = ('name', 'description', 'price', 'tags', 'units_sold', 'image')
+
+    def get_tags(self, obj):
+        return list(obj.tags.names())
 
     def get_image(self, obj):
         first_image = obj.images.first()
@@ -21,12 +25,15 @@ class ProductDetailSerializer(serializers.ModelSerializer):
     images = serializers.SerializerMethodField()
     videos = serializers.SerializerMethodField()
     audios = serializers.SerializerMethodField()
+    comment_count = serializers.SerializerMethodField()
+    average_rating = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
         fields = ['name', 'description', 'price', 'images', 'videos', 'audios', 'comment_count', 'average_rating']
 
     def __init__(self, *args, **kwargs):
+
         super().__init__(*args, **kwargs)
         self.user = self.context.get('request').user if self.context.get('request') else None
 
@@ -73,4 +80,3 @@ class CommentSerializer(serializers.ModelSerializer):
         if value < 1 or value > 5:
             raise serializers.ValidationError("Rating must be between 1 and 5.")
         return value
-    

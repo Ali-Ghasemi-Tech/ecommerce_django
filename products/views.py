@@ -1,12 +1,14 @@
-from django.shortcuts import render, get_object_or_404, redirect
 from rest_framework import generics
 from .models import Product, Comment
 from .serializers import ProductListSerializer, ProductDetailSerializer, CommentSerializer
 from rest_framework.pagination import PageNumberPagination
 from django.db.models import Q
-from rest_framework import serializers
+from rest_framework import serializers , status
 from .permissions import IsProductUser
 from rest_framework.permissions import AllowAny
+from django.urls import reverse
+from rest_framework.response import Response
+from order.models import Order , OrderItem
 
 
 #The home page view usually displays all the main products or categories.
@@ -27,7 +29,6 @@ class ProductListApi(generics.ListAPIView):
 # This view displays the details of a specific product. The user can view information about the product.
 class ProductDetailApi(generics.RetrieveAPIView):
     serializer_class = ProductDetailSerializer
-    lookup_field = 'product_id'
 
 
     def get_queryset(self):
@@ -40,12 +41,37 @@ class ProductDetailApi(generics.RetrieveAPIView):
             context['request'] = self.request
         return context
     
-    # def post(self):
-    #     # product = Product.objects.filter(id = product_id)
-    #     user = self.request.user
-    #     if not user == self.get_queryset().filter(users = user):
-    #         pass
-            
+
+    def post(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            login_url = reverse('login_api')  
+            return Response(
+                {"detail": "You are not logged in. Redirecting to login page..."},
+                status=status.HTTP_302_FOUND,
+                headers={"Location": login_url}
+            )
+
+       
+        product = self.get_object()
+
+        
+        order, created = Order.objects.get_or_create(customer=request.user, status=False)
+
+        
+        order_item, created = OrderItem.objects.get_or_create(order=order, product=product)
+        if not created:
+            product.units_sold += 1
+            product.save()
+
+        order.save()
+
+        return Response(
+            {"detail": "Product added to order successfully."},
+            status=status.HTTP_201_CREATED
+        )
+
+    
+
             
 
 

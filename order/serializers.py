@@ -19,7 +19,7 @@ class OrderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Order
-        fields = ['customer', 'date', 'status', 'total_price', 'items']
+        fields = ['customer', 'date','total_price', 'items']
 
     
     def get_total_price(self, obj):
