@@ -1,15 +1,34 @@
 from rest_framework import serializers
-from products.models import Product, Comment
+from products.models import Product, Comment, ProductAudio ,ProductVideo ,ProductImage
 from django.db.models import Avg
+
+
+class ProductImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductImage
+        fields = ['id', 'image']
+
+
+class ProductVideoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductVideo
+        fields = ['id', 'video']
+
+
+class ProductAudioSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductAudio
+        fields = ['id', 'audio']
 
 
 class ProductListSerializer(serializers.ModelSerializer):
     image = serializers.SerializerMethodField()
     tags = serializers.SerializerMethodField()
+    short_description = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
-        fields = ('name', 'description', 'price', 'tags', 'units_sold', 'image')
+        fields = ('name', 'short_description', 'price', 'tags', 'units_sold', 'image')
 
     def get_tags(self, obj):
         return list(obj.tags.names())
@@ -19,6 +38,10 @@ class ProductListSerializer(serializers.ModelSerializer):
         if first_image:
             return first_image.image.url
         return None
+
+    def get_short_description(self, obj):
+        words = obj.description.split()[:6]
+        return ' '.join(words)
 
 
 class ProductDetailSerializer(serializers.ModelSerializer):
@@ -45,19 +68,19 @@ class ProductDetailSerializer(serializers.ModelSerializer):
     def get_images(self, obj):
         if self._is_user_associated(obj):
             images = obj.images.all()
-            return [image.image.url for image in images]
+            return ProductImageSerializer(images, many=True, context=self.context).data
         return []
 
     def get_videos(self, obj):
         if self._is_user_associated(obj):
             videos = obj.videos.all()
-            return [video.video.url for video in videos]
+            return ProductVideoSerializer(videos, many=True, context=self.context).data
         return []
 
     def get_audios(self, obj):
         if self._is_user_associated(obj):
             audios = obj.audios.all()
-            return [audio.audio.url for audio in audios]
+            return ProductAudioSerializer(audios, many=True, context=self.context).data
         return []
 
     def get_comment_count(self, obj):
