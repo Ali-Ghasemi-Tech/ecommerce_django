@@ -45,6 +45,8 @@ class Account(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)
     date_joined = models.DateTimeField(default=timezone.now)
+    phone_number_active = models.BooleanField(default=False)
+    email_active = models.BooleanField(default=False)
 
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = ['phone_number']
@@ -69,7 +71,7 @@ def expire_date():
 
 class Profile(models.Model):
     user = models.OneToOneField(Account , on_delete=models.CASCADE)
-    email_verification_token = models.CharField(max_length=255 , blank=True , null= True)
+    email_verification_token = models.UUIDField(unique= True, editable=False , blank=True , null= True)
     phone_verification_token = models.CharField(max_length=255 , blank=True , null= True)
     verification_uuid = models.UUIDField(default=uuid.uuid4 , unique= True , editable= False)
     expire = models.DateTimeField(default=expire_date())

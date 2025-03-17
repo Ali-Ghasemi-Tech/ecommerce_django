@@ -7,7 +7,7 @@ from .models import Account
 class SignupSerializer(serializers.ModelSerializer):
     class Meta:
         model = Account
-        exclude = ['is_active' , 'last_login' , 'is_staff' , 'is_superuser' , 'date_joined' , 'groups' , 'user_permissions'] 
+        exclude = ['is_active' ,'phone_number_active' , 'email_active' , 'last_login' , 'is_staff' , 'is_superuser' , 'date_joined' , 'groups' , 'user_permissions'] 
         extra_kwargs = {
             'password': {'write_only': True},  # Ensure password is write-only
         }
@@ -121,7 +121,7 @@ class LoginSerializer(serializers.ModelSerializer):
         password = attrs.get('password')
 
         if not '@' in email_or_phone_or_username:
-            attrs['email_or_phone'] = ''.join(filter(str.isdigit, email_or_phone_or_username))
+            attrs['email_or_phone_or_username'] = ''.join(filter(str.isdigit, email_or_phone_or_username))
 
         return attrs
 
