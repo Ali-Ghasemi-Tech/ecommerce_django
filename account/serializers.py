@@ -120,9 +120,6 @@ class LoginSerializer(serializers.ModelSerializer):
         email_or_phone_or_username = attrs.get('email_or_phone_or_username')
         password = attrs.get('password')
 
-        if not '@' in email_or_phone_or_username:
-            attrs['email_or_phone_or_username'] = ''.join(filter(str.isdigit, email_or_phone_or_username))
-
         return attrs
 
 class AccountUpdateSerializer(serializers.ModelSerializer):
