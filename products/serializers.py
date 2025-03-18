@@ -1,24 +1,6 @@
 from rest_framework import serializers
-from products.models import Product, Comment, ProductAudio, ProductVideo, ProductImage
+from products.models import Product, Comment
 from django.db.models import Avg
-
-
-class ProductImageSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ProductImage
-        fields = ['id', 'image']
-
-
-class ProductVideoSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ProductVideo
-        fields = ['id', 'video']
-
-
-class ProductAudioSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ProductAudio
-        fields = ['id', 'audio']
 
 
 class ProductListSerializer(serializers.ModelSerializer):
@@ -69,19 +51,19 @@ class ProductDetailSerializer(serializers.ModelSerializer):
     def get_images(self, obj):
         if self._is_user_associated(obj):
             images = obj.images.all()
-            return ProductImageSerializer(images, many=True, context=self.context).data
+            return [image.image.url for image in images]
         return []
 
     def get_videos(self, obj):
         if self._is_user_associated(obj):
             videos = obj.videos.all()
-            return ProductVideoSerializer(videos, many=True, context=self.context).data
+            return [video.video.url for video in videos]
         return []
 
     def get_audios(self, obj):
         if self._is_user_associated(obj):
             audios = obj.audios.all()
-            return ProductAudioSerializer(audios, many=True, context=self.context).data
+            return [audio.audio.url for audio in audios]
         return []
 
     def get_comment_count(self, obj):
