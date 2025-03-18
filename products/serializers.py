@@ -32,10 +32,11 @@ class ProductDetailSerializer(serializers.ModelSerializer):
     audios = serializers.SerializerMethodField()
     comment_count = serializers.SerializerMethodField()
     average_rating = serializers.SerializerMethodField()
+    text_content = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
-        fields = ['name', 'description', 'price', 'images', 'videos', 'audios', 'comment_count', 'average_rating',
+        fields = ['name', 'description', 'price', 'images', 'videos', 'audios', 'text_content', 'comment_count', 'average_rating',
                   'units_sold']
 
     def __init__(self, *args, **kwargs):
@@ -65,6 +66,10 @@ class ProductDetailSerializer(serializers.ModelSerializer):
             audios = obj.audios.all()
             return [audio.audio.url for audio in audios]
         return []
+    
+    def get_text_content(self,obj):
+        if self._is_user_associated(obj):
+            return obj.text_content
 
     def get_comment_count(self, obj):
         return obj.comments.count()
