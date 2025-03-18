@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import ProductListApi, ProductDetailApi , CommentListCreateView
+from .views import ProductListApi, ProductDetailApi, CommentListCreateView
 
 urlpatterns = [
     path('', ProductListApi.as_view(), name='product-list'),

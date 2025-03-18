@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from products.models import Product, Comment, ProductAudio ,ProductVideo ,ProductImage
+from products.models import Product, Comment, ProductAudio, ProductVideo, ProductImage
 from django.db.models import Avg
 
 
@@ -28,7 +28,7 @@ class ProductListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        fields = ('name', 'short_description', 'price', 'tags', 'units_sold', 'image')
+        fields = ('id','name', 'short_description', 'price', 'tags', 'units_sold', 'image')
 
     def get_tags(self, obj):
         return list(obj.tags.names())
@@ -53,7 +53,8 @@ class ProductDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        fields = ['name', 'description', 'price', 'images', 'videos', 'audios', 'comment_count', 'average_rating']
+        fields = ['name', 'description', 'price', 'images', 'videos', 'audios', 'comment_count', 'average_rating',
+                  'units_sold']
 
     def __init__(self, *args, **kwargs):
 

@@ -3,12 +3,10 @@ from .models import Product, Comment
 from .serializers import ProductListSerializer, ProductDetailSerializer, CommentSerializer
 from rest_framework.pagination import PageNumberPagination
 from django.db.models import Q
-from rest_framework import serializers , status
+from rest_framework import serializers, status
 from .permissions import IsProductUser
 from rest_framework.permissions import AllowAny
-from django.urls import reverse
-from rest_framework.response import Response
-from order.models import Order , OrderItem
+
 
 
 #The home page view usually displays all the main products or categories.
@@ -30,7 +28,6 @@ class ProductListApi(generics.ListAPIView):
 class ProductDetailApi(generics.RetrieveAPIView):
     serializer_class = ProductDetailSerializer
 
-
     def get_queryset(self):
         # Use prefetch_related to optimize queries for images, videos, and audios
         return Product.objects.prefetch_related('images', 'videos', 'audios').all()
@@ -40,39 +37,6 @@ class ProductDetailApi(generics.RetrieveAPIView):
         if hasattr(self, 'request'):
             context['request'] = self.request
         return context
-    
-
-    def post(self, request, *args, **kwargs):
-        if not request.user.is_authenticated:
-            login_url = reverse('login_api')  
-            return Response(
-                {"detail": "You are not logged in. Redirecting to login page..."},
-                status=status.HTTP_302_FOUND,
-                headers={"Location": login_url}
-            )
-
-       
-        product = self.get_object()
-
-        
-        order, created = Order.objects.get_or_create(customer=request.user, status=False)
-
-        
-        order_item, created = OrderItem.objects.get_or_create(order=order, product=product)
-        if not created:
-            product.units_sold += 1
-            product.save()
-
-        order.save()
-
-        return Response(
-            {"detail": "Product added to order successfully."},
-            status=status.HTTP_201_CREATED
-        )
-
-    
-
-            
 
 
 class CommentListCreateView(generics.ListCreateAPIView):
