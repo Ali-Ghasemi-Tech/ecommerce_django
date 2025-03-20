@@ -58,9 +58,11 @@ INSTALLED_APPS = [
     'kavenegar',
     'debug_toolbar',
     'corsheaders',
+    'drf_yasg',
 
 
 ]
+
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
