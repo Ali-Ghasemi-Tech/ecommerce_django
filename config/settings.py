@@ -51,19 +51,18 @@ INSTALLED_APPS = [
     'products',
     'order',
     'account',
+    'corsheaders',
 
     #3rd party
     'rest_framework',
-    'taggit',
-    'kavenegar',
-    'debug_toolbar',
-    'corsheaders',
-
-
+    'taggit',  # Ensure django-taggit is installed: pip install django-taggit
+    'debug_toolbar',  # Ensure django-debug-toolbar is installed: pip install django-debug-toolbar
+    'kavenegar',  # Add this line
 ]
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
+    "whitenoise.middleware.WhiteNoiseMiddleware",  # Ensure this line is present
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -74,6 +73,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
 ]
 
 CORS_ALLOWED_ORIGINS = [
@@ -215,3 +215,19 @@ DEBUG_TOOLBAR_PANELS = [
 ]
 
 AUTH_USER_MODEL = 'account.Account'
+# add celery command
+CELERY_BROKER_URL = "redis://:your_secure_password@localhost:6379/0"
+CELERY_RESULT_BACKEND = "redis://:your_secure_password@localhost:6379/0"
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'Asia/Tehran'
+CELERY_BEAT_SCHEDULE = {
+    'send_sms': {
+        'task': 'account.tasks.send_sms',
+        'schedule': timedelta(seconds=10),
+    },
+}
+
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
+
