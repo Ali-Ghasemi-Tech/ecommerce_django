@@ -10,7 +10,7 @@ class ProductListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        fields = ('id','name', 'short_description', 'price', 'tags', 'units_sold', 'image')
+        fields = ('name', 'short_description', 'price', 'tags', 'units_sold', 'image')
 
     def get_tags(self, obj):
         return list(obj.tags.names())

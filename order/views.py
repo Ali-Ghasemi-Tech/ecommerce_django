@@ -1,26 +1,42 @@
-from django.shortcuts import get_object_or_404
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from .models import Order, OrderItem
 from .serializers import OrderSerializer, OrderItemSerializer
-from account.models import Account
+from products.models import Product
 
-
-
-class OrderDetailView(generics.RetrieveAPIView):
-    serializer_class = OrderSerializer
+class AddToOrderView(generics.CreateAPIView):
     permission_classes = [IsAuthenticated]
+    serializer_class = OrderItemSerializer
+
+    def create(self, request, *args, **kwargs):
+        user = request.user
+        product_id = request.data.get('product')
+        access_expiry_date = request.data.get('access_expiry_date', None)
+
+        try:
+            product = Product.objects.get(id=product_id)
+        except Product.DoesNotExist:
+            return Response({"detail": "Product not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        order, created = Order.objects.get_or_create(customer=user, status=False)
+
+        order_item = OrderItem.objects.create(
+            order=order,
+            product=product,
+            access_expiry_date=access_expiry_date
+        )
+
+        order.save()
+
+        serializer = OrderSerializer(order)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
+
+
+class OrderListView(generics.ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = OrderSerializer
 
     def get_queryset(self):
-        user = self.request.user
-        return Order.objects.filter(customer=user , status=False)
-
-
-class OrderItemDeleteView(generics.DestroyAPIView):
-    queryset = OrderItem.objects.all()
-    permission_classes = [IsAuthenticated]
-
-    def get_object(self):
-        order_item_id = self.kwargs.get('order_item_id')
-        return get_object_or_404(OrderItem, id=order_item_id, order__customer=self.request.user)
+        return Order.objects.filter(customer=self.request.user , status=False)
