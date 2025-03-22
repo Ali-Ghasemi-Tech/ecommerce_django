@@ -51,7 +51,6 @@ INSTALLED_APPS = [
     'products',
     'order',
     'account',
-    'corsheaders',
 
     #3rd party
     'rest_framework',
@@ -79,7 +78,6 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
-    "corsheaders.middleware.CorsMiddleware",
 ]
 
 CORS_ALLOWED_ORIGINS = [
