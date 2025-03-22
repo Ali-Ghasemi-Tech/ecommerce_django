@@ -33,8 +33,6 @@ class OrderItem(models.Model):
     def __str__(self):
         return f"{self.product.name} in Order {self.order.id}"
 
-<<<<<<< HEAD
-=======
 class Payment(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="payments")
     payment_date = models.DateTimeField(auto_now_add=True)
@@ -45,4 +43,3 @@ class Payment(models.Model):
     def __str__(self):
         return f"Payment for Order {self.order.id}"
 
->>>>>>> my-new-branch
