@@ -1,115 +1,77 @@
 services:
-  web:
+  django:
     build: .
-    command: >
-      sh -c "
-      ./wait-for-it.sh db:5432 -- echo 'Database is ready' &&
-      ./wait-for-it.sh redis:6379 -- echo 'Redis is ready' &&
-      python manage.py migrate &&
-      python manage.py collectstatic --noinput &&
-      gunicorn config.wsgi:application --bind 0.0.0.0:8000"
+    container_name: django_app
+    command: sh -c "sleep 5 && gunicorn config.wsgi:application --bind 0.0.0.0:8000"
     volumes:
       - .:/app
     ports:
       - "8000:8000"
-    depends_on:
-      - db
-      - redis
+    restart: on-failure  # در صورت خطا، اتوماتیک ری‌استارت می‌شود
     env_file:
       - .env
-    restart: always
-
-  db:
-    image: postgres:15
-    restart: always
     environment:
-      POSTGRES_DB: mydb
-      POSTGRES_USER: myuser
-      POSTGRES_PASSWORD: mypassword
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - PYTHONPATH=/app/ecommerce_django  # Updated PYTHONPATH
+      - DJANGO_SETTINGS_MODULE=ecommerce_django.settings
+    networks:
+      - backend
+    depends_on:
+      - redis
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000 || exit 1"]
+      interval: 10s
+      retries: 5
+      start_period: 90s  # Increased from 60s to 90s
+      timeout: 10s       # Increased from 5s to 10s
 
   redis:
-    image: redis:alpine
-    restart: always
+    image: redis:7
+    container_name: redis_cache
+    restart: on-failure  # در صورت خطا، اتوماتیک ری‌استارت می‌شود
+    ports:
+      - "6379:6379"
+    networks:
+      - backend
 
   celery:
     build: .
-    command: >
-      sh -c "
-      ./wait-for-it.sh redis:6379 -- echo 'Redis is ready' &&
-      celery -A config worker --loglevel=info"
+    container_name: celery_worker
+    command: sh -c "sleep 5 && celery -A config worker --loglevel=info"
     depends_on:
-      - redis
-      - web
+      django:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    restart: on-failure  # در صورت خطا، اتوماتیک ری‌استارت می‌شود
     env_file:
       - .env
-    restart: always
+    environment:
+      - PYTHONPATH=/app/ecommerce_django  # Updated PYTHONPATH
+      - DJANGO_SETTINGS_MODULE=ecommerce_django.settings
+    networks:
+      - backend
 
-  celery-beat:
+  celery_beat:
     build: .
-    command: >
-      sh -c "
-      ./wait-for-it.sh redis:6379 -- echo 'Redis is ready' &&
-      celery -A config beat --loglevel=info"
+    container_name: celery_beat
+    command: sh -c "sleep 5 && celery -A config beat --loglevel=info"
     depends_on:
-      - redis
-      - web
-      - celery
+      django:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      celery:
+        condition: service_started
+    restart: on-failure  # در صورت خطا، اتوماتیک ری‌استارت می‌شود
     env_file:
       - .env
-    restart: always
+    environment:
+      - PYTHONPATH=/app/ecommerce_django  # Updated PYTHONPATH
+      - DJANGO_SETTINGS_MODULE=ecommerce_django.settings
+    networks:
+      - backend
 
-volumes:
-  postgres_data:
+networks:
+  backend:
+    driver: bridge
 
-# DD
-# version: '3.8'
-
-# services:
-#   redis:
-#     image: redis:alpine
-#     restart: always
-#     ports:
-#       - "6379:6379"
-
-#   web:
-#     build: .
-#     command: gunicorn myproject.wsgi:application --bind 0.0.0.0:8000
-#     volumes:
-#       - .:/app
-#     ports:
-#       - "8000:8000"
-#     depends_on:
-#       - redis
-#     environment:
-#       - REDIS_HOST=redis
-#       - REDIS_PORT=6379
-
-#   celery:
-#     build: .
-#     command: celery -A myproject worker --loglevel=info
-#     depends_on:
-#       - redis
-#       - web
-#     environment:
-#       - CELERY_BROKER_URL=redis://redis:6379/0
-
-
-#   celery-beat:
-# می‌توانید برای اطمینان از آماده بودن Redis قبل از اجرا شدن Celery، از healthcheck استفاده کنید:
-
-# yaml
-# Copy
-# Edit
-#   redis:
-#     image: redis:alpine
-#     restart: always
-#     ports:
-#       - "6379:6379"
-#     healthcheck:
-#       test: ["CMD", "redis-cli", "ping"]
-#       interval: 10s
-#       retries: 5
-#       start_period: 5s
-# این باعث می‌شود که داکر صبر کند تا Redis آماده شود، سپس Celery و Web را اجرا کند.
