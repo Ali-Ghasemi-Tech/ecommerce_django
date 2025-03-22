@@ -55,7 +55,6 @@ INSTALLED_APPS = [
 
     #3rd party
     'rest_framework',
-<<<<<<< HEAD
     'taggit',
     'kavenegar',
     'debug_toolbar',
@@ -63,11 +62,7 @@ INSTALLED_APPS = [
     'drf_yasg',
 
 
-=======
-    'taggit',  # Ensure django-taggit is installed: pip install django-taggit
-    'debug_toolbar',  # Ensure django-debug-toolbar is installed: pip install django-debug-toolbar
-    'kavenegar',  # Add this line
->>>>>>> my-new-branch
+
 ]
 
 
