@@ -231,3 +231,15 @@ CELERY_BEAT_SCHEDULE = {
 
 CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 
+
+# درگاه بانکی
+ZARINPAL_MERCHANT_ID = 'YOUR_MERCHANT_ID'  # کد مرچنت زرین‌پال خود را وارد کنید
+ZARINPAL_SANDBOX = True  # برای تست مقدار True، برای پرداخت واقعی مقدار False قرار دهید
+ZARINPAL_CALLBACK_URL = 'http://localhost:8000/order/verify/'  # آدرس صفحه‌ای که زرین‌پال کاربر را به آن هدایت می‌کند
+ZARINPAL_DESCRIPTION = 'پرداخت سفارش از فروشگاه'  # توضیحات پرداخت
+ZARINPAL_EMAIL = ''
+ZARINPAL_MOBILE = '09123456789'
+ZARINPAL_TEL = '02112345678'
+ZARINPAL_FOOTER_TEXT = 'فروشگاه اینترنتی'
+ZARINPAL_FOOTER_LINK = 'http://localhost:8000/'
+
