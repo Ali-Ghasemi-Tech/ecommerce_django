@@ -21,8 +21,8 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = "thelastblade30@gmail.com"
-EMAIL_HOST_PASSWORD = 'eclznusskuuzggic'
+EMAIL_HOST_USER = "the sender email address"
+EMAIL_HOST_PASSWORD = 'your_app_password'
 
 
 # Quick-start development settings - unsuitable for production
@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'products',
     'order',
     'account',
+    'payment',
 
     #3rd party
     'rest_framework',
@@ -237,7 +238,7 @@ CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 
 
 # درگاه بانکی
-ZARINPAL_MERCHANT_ID = 'YOUR_MERCHANT_ID'  # کد مرچنت زرین‌پال خود را وارد کنید
+ZARINPAL_MERCHANT_ID = '1cf663d7-47e5-45c0-a3de-f828c14c38ef'  # کد مرچنت زرین‌پال خود را وارد کنید
 ZARINPAL_SANDBOX = True  # برای تست مقدار True، برای پرداخت واقعی مقدار False قرار دهید
 ZARINPAL_CALLBACK_URL = 'http://localhost:8000/order/verify/'  # آدرس صفحه‌ای که زرین‌پال کاربر را به آن هدایت می‌کند
 ZARINPAL_DESCRIPTION = 'پرداخت سفارش از فروشگاه'  # توضیحات پرداخت

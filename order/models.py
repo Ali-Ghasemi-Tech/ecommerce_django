@@ -12,11 +12,11 @@ class Order(models.Model):
     status = models.BooleanField(default=False)  # True for paid, False for unpaid
     total_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
-    def calculate_total_price(self):
-        return sum(item.product.price for item in self.items.all())
+    # def calculate_total_price(self):
+    #     return sum(item.product.price for item in self.items.all())
 
     def save(self, *args, **kwargs):
-        self.total_price = self.calculate_total_price()
+        # self.total_price = self.calculate_total_price()
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -32,14 +32,4 @@ class OrderItem(models.Model):
 
     def __str__(self):
         return f"{self.product.name} in Order {self.order.id}"
-
-class Payment(models.Model):
-    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="payments")
-    payment_date = models.DateTimeField(auto_now_add=True)
-    amount = models.DecimalField(max_digits=10, decimal_places=2)
-    payment_method = models.CharField(max_length=50)
-    status = models.CharField(max_length=50)
-
-    def __str__(self):
-        return f"Payment for Order {self.order.id}"
 
