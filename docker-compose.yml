@@ -1,0 +1,77 @@
+services:
+  django:
+    build: .
+    container_name: django_app
+    command: sh -c "sleep 5 && gunicorn config.wsgi:application --bind 0.0.0.0:8000"
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    restart: on-failure  # در صورت خطا، اتوماتیک ری‌استارت می‌شود
+    env_file:
+      - .env
+    environment:
+      - PYTHONPATH=/app/ecommerce_django  # Updated PYTHONPATH
+      - DJANGO_SETTINGS_MODULE=ecommerce_django.settings
+    networks:
+      - backend
+    depends_on:
+      - redis
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000 || exit 1"]
+      interval: 10s
+      retries: 5
+      start_period: 90s  # Increased from 60s to 90s
+      timeout: 10s       # Increased from 5s to 10s
+
+  redis:
+    image: redis:7
+    container_name: redis_cache
+    restart: on-failure  # در صورت خطا، اتوماتیک ری‌استارت می‌شود
+    ports:
+      - "6379:6379"
+    networks:
+      - backend
+
+  celery:
+    build: .
+    container_name: celery_worker
+    command: sh -c "sleep 5 && celery -A config worker --loglevel=info"
+    depends_on:
+      django:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    restart: on-failure  # در صورت خطا، اتوماتیک ری‌استارت می‌شود
+    env_file:
+      - .env
+    environment:
+      - PYTHONPATH=/app/ecommerce_django  # Updated PYTHONPATH
+      - DJANGO_SETTINGS_MODULE=ecommerce_django.settings
+    networks:
+      - backend
+
+  celery_beat:
+    build: .
+    container_name: celery_beat
+    command: sh -c "sleep 5 && celery -A config beat --loglevel=info"
+    depends_on:
+      django:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      celery:
+        condition: service_started
+    restart: on-failure  # در صورت خطا، اتوماتیک ری‌استارت می‌شود
+    env_file:
+      - .env
+    environment:
+      - PYTHONPATH=/app/ecommerce_django  # Updated PYTHONPATH
+      - DJANGO_SETTINGS_MODULE=ecommerce_django.settings
+    networks:
+      - backend
+
+networks:
+  backend:
+    driver: bridge
+

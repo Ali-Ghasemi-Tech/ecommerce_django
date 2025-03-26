@@ -21,8 +21,8 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = "thelastblade30@gmail.com"
-EMAIL_HOST_PASSWORD = 'eclznusskuuzggic'
+EMAIL_HOST_USER = "the sender email address"
+EMAIL_HOST_PASSWORD = 'your_app_password'
 
 
 # Quick-start development settings - unsuitable for production
@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'products',
     'order',
     'account',
+    'payment',
 
     #3rd party
     'rest_framework',
@@ -58,12 +59,16 @@ INSTALLED_APPS = [
     'kavenegar',
     'debug_toolbar',
     'corsheaders',
+    'drf_yasg',
+
 
 
 ]
 
+
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
+    "whitenoise.middleware.WhiteNoiseMiddleware",  # Ensure this line is present
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -171,8 +176,15 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = '/static/'
+STATIC_URL = 'static/'
 STORAGES = {
+
+   "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+        "OPTIONS": {
+            "location": "media",
+        },
+    },
     "staticfiles": {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     },
@@ -209,3 +221,31 @@ DEBUG_TOOLBAR_PANELS = [
 ]
 
 AUTH_USER_MODEL = 'account.Account'
+# add celery command
+CELERY_BROKER_URL = "redis://:your_secure_password@localhost:6379/0"
+CELERY_RESULT_BACKEND = "redis://:your_secure_password@localhost:6379/0"
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'Asia/Tehran'
+CELERY_BEAT_SCHEDULE = {
+    'send_sms': {
+        'task': 'account.tasks.send_sms',
+        'schedule': timedelta(seconds=10),
+    },
+}
+
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
+
+
+# درگاه بانکی
+ZARINPAL_MERCHANT_ID = '1cf663d7-47e5-45c0-a3de-f828c14c38ef'  # کد مرچنت زرین‌پال خود را وارد کنید
+ZARINPAL_SANDBOX = True  # برای تست مقدار True، برای پرداخت واقعی مقدار False قرار دهید
+ZARINPAL_CALLBACK_URL = 'http://localhost:8000/order/verify/'  # آدرس صفحه‌ای که زرین‌پال کاربر را به آن هدایت می‌کند
+ZARINPAL_DESCRIPTION = 'پرداخت سفارش از فروشگاه'  # توضیحات پرداخت
+ZARINPAL_EMAIL = ''
+ZARINPAL_MOBILE = '09123456789'
+ZARINPAL_TEL = '02112345678'
+ZARINPAL_FOOTER_TEXT = 'فروشگاه اینترنتی'
+ZARINPAL_FOOTER_LINK = 'http://localhost:8000/'
+
