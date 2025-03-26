@@ -9,7 +9,7 @@ class SignupSerializer(serializers.ModelSerializer):
         model = Account
         exclude = ['is_active' ,'phone_number_active' , 'email_active' , 'last_login' , 'is_staff' , 'is_superuser' , 'date_joined' , 'groups' , 'user_permissions'] 
         extra_kwargs = {
-            'password': {'write_only': True},  # Ensure password is write-only
+            'password': {'write_only': True},  
         }
 
     def validate_username(self , validated_data):
@@ -25,7 +25,8 @@ class SignupSerializer(serializers.ModelSerializer):
     
     def validate_first_name(self , validated_data):
         first_name = validated_data
-        
+        if first_name == '':
+            return first_name
         if not first_name.isalpha():
             raise serializers.ValidationError('first name should only contain alphabetic characters')
         
@@ -33,6 +34,8 @@ class SignupSerializer(serializers.ModelSerializer):
     
     def validate_last_name(self , validated_data):
         last_name = validated_data
+        if last_name == '':
+            return last_name
         if not last_name.isalpha():
             raise serializers.ValidationError('last name should only contain alphabetic characters')
         
