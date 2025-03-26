@@ -34,7 +34,7 @@ SECRET_KEY = 'django-insecure-m@nt^dyh^ddr9*g^yf=fiklztc*06ze)_o3&eb*^1webfznt%%
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['TLB.pythonanywhere.com']
 
 
 # Application definition
@@ -115,7 +115,7 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': 'mydatabase', # This is where you put the name of the db file. 
+        'NAME': 'mydatabase', # This is where you put the name of the db file.
                  # If one doesn't exist, it will be created at migration time.
     }
 }
@@ -129,7 +129,7 @@ REST_FRAMEWORK = {
         'rest_framework.renderers.JSONRenderer',
         'rest_framework.renderers.BrowsableAPIRenderer',  # Ensure this is included
     ],
-    
+
 }
 
 
@@ -173,7 +173,6 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STORAGES = {
-    # ...
     "staticfiles": {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     },
@@ -181,7 +180,7 @@ STORAGES = {
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 # STATICFILES_DIRS = [BASE_DIR/'static']
 
-# MEDIA_ROOT = os.path.join(BASE_DIR, 'media') 
+# MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # MEDIA_URL = '/media/'
 
 # Default primary key field type

@@ -14,9 +14,9 @@ kavenegar==1.1.2
 pillow==11.1.0
 PyJWT==2.9.0
 requests==2.32.3
-setuptools==75.8.0
 sqlparse==0.5.3
+typing_extensions==4.12.2
 tzdata==2025.1
 urllib3==2.3.0
 uuid==1.30
-wheel==0.45.1
+whitenoise==6.9.0
