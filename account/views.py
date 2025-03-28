@@ -1,5 +1,5 @@
-from rest_framework.generics import ListCreateAPIView ,RetrieveUpdateAPIView
-from rest_framework import status , viewsets , permissions
+from rest_framework.generics import ListCreateAPIView ,RetrieveUpdateAPIView ,CreateAPIView
+from rest_framework import status , viewsets , permissions , exceptions
 from rest_framework.response import Response
 from django.shortcuts import redirect , get_object_or_404
 from django.urls import reverse
@@ -49,19 +49,17 @@ def handle_phone_api(user):
     except HTTPException as e: 
         print(e)
 
-class SignupApiView(ListCreateAPIView):
+class SignupApiView(CreateAPIView):
     serializer_class = SignupSerializer
-
-    # remove for production
-    def get_queryset(self):
-        if self.request.user.is_superuser or self.request.user.is_staff:
-            return Account.objects.all()
-        else:
-            try:
-                return []
-            except Account.DoesNotExist:
-                return []
-
+    
+   
+    def handle_exception(self, exc):
+        if isinstance(exc, exceptions.MethodNotAllowed):
+            return Response(
+                None,
+                status=status.HTTP_405_METHOD_NOT_ALLOWED
+            )
+        return super().handle_exception(exc)
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
