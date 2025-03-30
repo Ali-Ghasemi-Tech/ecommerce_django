@@ -1,5 +1,5 @@
 from rest_framework.generics import ListCreateAPIView ,RetrieveUpdateAPIView ,CreateAPIView
-from rest_framework import status , viewsets , permissions , exceptions
+from rest_framework import status , viewsets , permissions , exceptions , views
 from rest_framework.response import Response
 from django.shortcuts import redirect , get_object_or_404
 from django.urls import reverse
@@ -49,17 +49,19 @@ def handle_phone_api(user):
     except HTTPException as e: 
         print(e)
 
-class SignupApiView(CreateAPIView):
-    serializer_class = SignupSerializer
+class SignupApiView(views.APIView):
     
+    
+    def get_serializer_context(self):
+        return {"request": self.request}
    
-    def handle_exception(self, exc):
-        if isinstance(exc, exceptions.MethodNotAllowed):
-            return Response(
-                None,
-                status=status.HTTP_405_METHOD_NOT_ALLOWED
-            )
-        return super().handle_exception(exc)
+    def get_serializer(self, data, *args, **kwargs):
+        return SignupSerializer(data=data, context=self.get_serializer_context())
+    
+    def get_serializer_context(self):
+        # Pass request context to serializer (e.g., for URL building)
+        return {"request": self.request}
+    
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
@@ -69,8 +71,11 @@ class SignupApiView(CreateAPIView):
                 handle_phone_api(user)
                 handle_email_api(user)
                 profile = Profile.objects.get(user=user)
-                return redirect(reverse("verify_phone", kwargs={"verification_uuid": profile.verification_uuid}))
-            
+                return Response({
+                        "message": "Verification code sent to your phone and the link has been sent to your email",
+                        "verification_uuid": str(profile.verification_uuid),
+                        "next_step": "verify_phone"  
+                    }, status=status.HTTP_200_OK)             
             elif serializer.validated_data['phone_number']:
                 handle_phone_api(user) 
                 profile = Profile.objects.get(user=user)
