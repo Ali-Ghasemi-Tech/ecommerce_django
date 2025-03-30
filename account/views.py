@@ -72,7 +72,7 @@ class SignupApiView(views.APIView):
                 handle_email_api(user)
                 profile = Profile.objects.get(user=user)
                 return Response({
-                        "message": "Verification code sent to your phone and the link has been sent to your email",
+                        "message": "کذ تایید به شماره تلفنی که وارد کردید ارسال شد و لینک تایید به ایمیلتان ارسال شد",
                         "verification_uuid": str(profile.verification_uuid),
                         "next_step": "verify_phone"  
                     }, status=status.HTTP_200_OK)             
@@ -80,13 +80,13 @@ class SignupApiView(views.APIView):
                 handle_phone_api(user) 
                 profile = Profile.objects.get(user=user)
                 return Response({
-                        "message": "Verification code sent to your phone",
+                        "message": "کذ تایید به شماره تلفنی که وارد کردید ارسال شد",
                         "verification_uuid": str(profile.verification_uuid),
                         "next_step": "verify_phone"  
                     }, status=status.HTTP_200_OK)            
             elif serializer.validated_data['email']:
                 handle_email_api(user)
-                Response({'message' : "vrificatin link has been sent to your email"} , status=status.HTTP_200_OK)
+                Response({'message' : "لینک تایید به ایمیلتان ارسال شد"} , status=status.HTTP_200_OK)
 
             
             
