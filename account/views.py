@@ -74,8 +74,11 @@ class SignupApiView(CreateAPIView):
             elif serializer.validated_data['phone_number']:
                 handle_phone_api(user) 
                 profile = Profile.objects.get(user=user)
-                return redirect(reverse("verify_phone", kwargs={"verification_uuid": profile.verification_uuid}))
-            
+                return Response({
+                        "message": "Verification code sent to your phone",
+                        "verification_uuid": str(profile.verification_uuid),
+                        "next_step": "verify_phone"  
+                    }, status=status.HTTP_200_OK)            
             elif serializer.validated_data['email']:
                 handle_email_api(user)
                 Response({'message' : "vrificatin link has been sent to your email"} , status=status.HTTP_200_OK)
