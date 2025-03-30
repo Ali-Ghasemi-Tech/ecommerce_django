@@ -137,6 +137,9 @@ DATABASES = {
         'PASSWORD': 'Ali_pass1234!',
         'HOST':'TLB.mysql.pythonanywhere-services.com',
         'PORT':'3306',
+        'OPTIONS': {
+            'init_command': 'SET default_storage_engine=INNODB',
+            }
     }
 }
 
