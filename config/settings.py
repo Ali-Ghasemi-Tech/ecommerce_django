@@ -117,31 +117,31 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': 'mydatabase', # This is where you put the name of the db file.
-#                  # If one doesn't exist, it will be created at migration time.
-#     }
-# }
-
-
-
-
-
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'TLB$default',
-        'USER': 'TLB',
-        'PASSWORD': 'Ali_pass1234!',
-        'HOST':'TLB.mysql.pythonanywhere-services.com',
-        'PORT':'3306',
-        'OPTIONS': {
-            'init_command': 'SET default_storage_engine=INNODB',
-            }
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': 'mydatabase', # This is where you put the name of the db file.
+                 # If one doesn't exist, it will be created at migration time.
     }
 }
+
+
+
+
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'TLB$default',
+#         'USER': 'TLB',
+#         'PASSWORD': 'Ali_pass1234!',
+#         'HOST':'TLB.mysql.pythonanywhere-services.com',
+#         'PORT':'3306',
+#         'OPTIONS': {
+#             'init_command': 'SET default_storage_engine=INNODB',
+#             }
+#     }
+# }
 
 
 REST_FRAMEWORK = {

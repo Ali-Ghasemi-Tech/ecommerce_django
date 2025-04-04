@@ -111,13 +111,11 @@ class VerifyPhoneSerializer(serializers.Serializer):
         }
     )
 
-class LoginSerializer(serializers.ModelSerializer):
+class LoginSerializer(serializers.Serializer):
     email_or_phone_or_username = serializers.CharField(required=True)
     password = serializers.CharField(style={'input_type': 'password'})
 
-    class Meta:
-        model = Account
-        fields = ['email_or_phone_or_username', 'password']
+
 
     def validate(self, attrs):
         email_or_phone_or_username = attrs.get('email_or_phone_or_username')

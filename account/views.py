@@ -137,9 +137,16 @@ class VerifyPhoneView(APIView):
             return Response({"error": f"Invalid token {token}"}, status=status.HTTP_400_BAD_REQUEST)
         
 
-class LoginApiView(APIView):
-    serializer_class = LoginSerializer
+class LoginApiView(views.APIView):
 
+
+   
+    def get_serializer(self, data, *args, **kwargs):
+        return LoginSerializer(data=data, context=self.get_serializer_context())
+    
+    def get_serializer_context(self):
+        return {"request": self.request}
+    
     def post(self, request):
         serializer = LoginSerializer(data=request.data)
         if serializer.is_valid():
@@ -156,7 +163,9 @@ class LoginApiView(APIView):
                 return Response({'message': 'Login successful'}, status=status.HTTP_200_OK)
             else:
                 # Authentication failed
-                return Response({'error': 'Invalid credentials or phone/email not verified'}, status=status.HTTP_401_UNAUTHORIZED)
+                return Response({'error': 'اطلاعات وارد شده صحیح نمیباشند یا شماره تلفن خود را تایید نکردید'}, status=status.HTTP_401_UNAUTHORIZED)
+        else:
+            return Response({'error': 'the form is not valid'} , status=status.HTTP_400_BAD_REQUEST)
 
 class UpdateApiView(RetrieveUpdateAPIView):
     queryset = Account.objects.all()
